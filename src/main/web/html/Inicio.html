@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Inicio</title>
+    <style>
+        /* Estilo general */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            color: #4e54c8;
+            margin-bottom: 20px;
+        }
+
+        /* Estilo del menú de hamburguesa */
+        .menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #4e54c8;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 25px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .hamburger div {
+            width: 100%;
+            height: 3px;
+            background: white;
+        }
+
+        .menu-content {
+            display: none;
+            position: fixed;
+            top: 50px;
+            left: 0;
+            width: 100%;
+            background: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            padding: 10px 0;
+        }
+
+        .menu-content a {
+            display: block;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #4e54c8;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .menu-content a:hover {
+            background: #f0f0f0;
+        }
+
+        /* Contenido principal */
+        .main-content {
+            margin-top: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Menú de hamburguesa -->
+<div class="menu">
+    <div class="menu-title">Gestión de Recursos</div>
+    <div class="hamburger" onclick="toggleMenu()">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</div>
+<div class="menu-content" id="menuContent">
+    <a href="bitacoras.html">Gestión de Bitácoras</a>
+    <a href="equipos.html">Gestión de Equipos</a>
+    <a href="alumnos.html">Gestión de Alumnos</a>
+    <a href="empleados.html">Gestión de Empleados</a>
+    <a href="inicio.html">Inicio</a>
+</div>
+
+<!-- Contenido principal -->
+<div class="container main-content">
+    <h1>Bienvenido</h1>
+    <p>Seleccione una opción en el menú para comenzar.</p>
+</div>
+
+<script>
+    function toggleMenu() {
+        const menuContent = document.getElementById('menuContent');
+        if (menuContent.style.display === 'block') {
+            menuContent.style.display = 'none';
+        } else {
+            menuContent.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

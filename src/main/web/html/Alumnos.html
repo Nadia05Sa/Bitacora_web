@@ -1,0 +1,254 @@
+ <!DOCTYPE html>
+        <html lang="es">
+        <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Gestión de Alumnos - Admin</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: center;
+                height: 100vh;
+                background: linear-gradient(135deg, #4e54c8, #8f94fb);
+                font-family: Arial, sans-serif;
+                color: #333;
+            }
+
+            .container {
+                width: 90%;
+                max-width: 600px;
+                margin-top: 20px;
+                padding: 20px;
+                background: #ffffff;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            h1 {
+                text-align: center;
+                font-size: 2rem;
+                color: #4e54c8;
+                margin-bottom: 20px;
+            }
+
+            form {
+                margin-bottom: 20px;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+
+            input {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 15px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+            }
+
+            button {
+                width: 100%;
+                padding: 10px;
+                background: #4e54c8;
+                color: white;
+                font-size: 16px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background 0.3s ease;
+            }
+
+            button:hover {
+                background: #6c63ff;
+            }
+
+            .error, .success {
+                padding: 10px;
+                margin-bottom: 15px;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+
+            .error {
+                color: #ff0000;
+                background: #ffe6e6;
+            }
+
+            .success {
+                color: #006600;
+                background: #e6ffe6;
+            }
+
+            .alumnos-list h2 {
+                margin-bottom: 15px;
+                font-size: 1.5rem;
+                color: #4e54c8;
+            }
+
+            .alumno-item {
+                padding: 10px;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .alumno-item:last-child {
+                border-bottom: none;
+            }
+
+            .alumno-actions button {
+                margin-top: 10px;
+                padding: 5px 10px;
+                font-size: 14px;
+                background: #f44336;
+                color: white;
+                border: none;
+                border-radius: 3px;
+                cursor: pointer;
+            }
+
+            .alumno-actions button:hover {
+                background: #d32f2f;
+            }    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Gestión de Alumnos</h1>
+
+    <form id="alumnoForm">
+        <div id="message"></div>
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" placeholder="Ingrese el nombre del alumno" required>
+
+        <label for="apellido">Apellido:</label>
+        <input type="text" id="apellido" placeholder="Ingrese el apellido del alumno" required>
+
+        <label for="matricula">Matrícula:</label>
+        <input type="text" id="matricula" placeholder="Ingrese la matrícula" required>
+
+        <label for="correo">Correo:</label>
+        <input type="email" id="correo" placeholder="Ingrese el correo del alumno" required>
+
+        <label for="contrasena">Contraseña:</label>
+        <input type="password" id="contrasena" placeholder="Ingrese la contraseña" required>
+
+        <button type="submit">Registrar Alumno</button>
+    </form>
+
+    <div class="alumnos-list">
+        <h2>Lista de Alumnos</h2>
+        <div id="alumnosList">
+            <!-- Los alumnos se agregarán aquí dinámicamente -->
+        </div>
+    </div>
+</div>
+
+<script>
+    const apiBaseUrl = 'http://localhost:4200/v1/alumnos'; // Cambia según tu configuración
+    const adminRole = true; // Asume que se determina desde el backend al iniciar sesión
+
+    // Función para mostrar mensajes
+    function showMessage(message, type) {
+        const messageBox = document.getElementById('message');
+        messageBox.className = type; // 'error' o 'success'
+        messageBox.textContent = message;
+        setTimeout(() => {
+            messageBox.className = '';
+            messageBox.textContent = '';
+        }, 3000);
+    }
+
+    // Registrar un nuevo alumno
+    document.getElementById('alumnoForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        if (!adminRole) {
+            showMessage('No tienes permisos para registrar alumnos', 'error');
+            return;
+        }
+
+        const alumno = {
+            nombre: document.getElementById('nombre').value,
+            apellido: document.getElementById('apellido').value,
+            matricula: document.getElementById('matricula').value,
+            correo: document.getElementById('correo').value,
+            contrasena: document.getElementById('contrasena').value,
+        };
+
+        fetch(`${apiBaseUrl}/admin`, { // Ruta especial para administradores
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(alumno)
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Error al registrar el alumno');
+                return response.json();
+            })
+            .then(() => {
+                showMessage('Alumno registrado con éxito', 'success');
+                document.getElementById('alumnoForm').reset();
+                cargarAlumnos();
+            })
+            .catch(error => showMessage(error.message, 'error'));
+    });
+
+    // Cargar lista de alumnos
+    function cargarAlumnos() {
+        fetch(`${apiBaseUrl}/admin`) // Ruta especial para listar alumnos como administrador
+            .then(response => {
+                if (!response.ok) throw new Error('Error al cargar la lista de alumnos');
+                return response.json();
+            })
+            .then(data => {
+                const alumnosList = document.getElementById('alumnosList');
+                alumnosList.innerHTML = '';
+                data.forEach(alumno => {
+                    const div = document.createElement('div');
+                    div.className = 'alumno-item';
+                    div.innerHTML = `
+                        <div>
+                            <strong>${alumno.nombre} ${alumno.apellido}</strong>
+                            <p>Matrícula: ${alumno.matricula}</p>
+                            <p>Correo: ${alumno.correo}</p>
+                            <div class="alumno-actions">
+                                <button onclick="eliminarAlumno('${alumno.id}')">Eliminar</button>
+                            </div>
+                        </div>
+                    `;
+                    alumnosList.appendChild(div);
+                });
+            })
+            .catch(error => showMessage(error.message, 'error'));
+    }
+
+    // Eliminar un alumno
+    function eliminarAlumno(id) {
+        if (!adminRole) {
+            showMessage('No tienes permisos para eliminar alumnos', 'error');
+            return;
+        }
+
+        fetch(`${apiBaseUrl}/admin/${id}`, { // Ruta especial para eliminar alumnos
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Error al eliminar el alumno');
+                return response.json();
+            })
+            .then(() => {
+                showMessage('Alumno eliminado con éxito', 'success');
+                cargarAlumnos();
+            })
+            .catch(error => showMessage(error.message, 'error'));
+    }
+
+    // Cargar alumnos al inicio
+    cargarAlumnos();
+</script>
+</body>
+</html>
