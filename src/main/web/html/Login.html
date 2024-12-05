@@ -94,34 +94,38 @@
         <button type="submit">ACCEDER</button>
     </form>
 </div>
+<script>// Base de datos simulada con credenciales y roles
+const users = [
+    { email: "admin@utez.edu.mx", password: "admin1234", role: "Admin" },
+    { email: "user@utez.edu.mx", password: "user1234", role: "User" }
+];
 
-<script>
-    // Credenciales del administrador
-    const adminCredentials = {
-        email: "admin@utez.edu.mx",
-        password: "admin1234"  // Cambiar a una contraseña más segura para producción
-    };
+// Manejo del formulario de inicio de sesión
+const loginForm = document.getElementById('loginForm');
+loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
 
-    // Manejo del formulario de inicio de sesión
-    const loginForm = document.getElementById('loginForm');
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+    // Buscar usuario en la base de datos simulada
+    const user = users.find(u => u.email === email && u.password === password);
 
-        // Validación de credenciales
-        if (email === adminCredentials.email && password === adminCredentials.password) {
-            alert("Inicio de sesión exitoso. ¡Bienvenido, Administrador!");
-            // Redirige a la página del administrador
+    if (user) {
+        alert(`Inicio de sesión exitoso. ¡Bienvenido, ${user.role}!`);
+
+        // Almacenar la información del usuario en el almacenamiento local
+        sessionStorage.setItem('user', JSON.stringify(user));
+
+        // Redirigir según el rol
+        if (user.role === "Admin") {
             window.location.href = "inicio.html";
-
-            // Almacena la sesión en el almacenamiento local para simular la persistencia
-            sessionStorage.setItem('user', 'admin');
-        } else {
-            alert("Credenciales incorrectas. Inténtalo de nuevo.");
+        } else if (user.role === "User") {
+            window.location.href = "user_dashboard.html";
         }
-    });
-</script>
+    } else {
+        alert("Credenciales incorrectas. Inténtalo de nuevo.");
+    }
+});</script>
 </body>
 </html>
