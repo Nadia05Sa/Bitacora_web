@@ -1,16 +1,31 @@
+/* Estilo general del body */
 body {
     margin: 0;
     padding: 0;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #3f2b96, #a8c0ff);
+    background: no-repeat center/cover url("../img/pasillo.jpg");
     font-family: Arial, sans-serif;
+    position: relative; /* Para posicionar elementos absolutos como .overlay */
+}
+
+/* Capa translúcida */
+.overlay {
+    position: absolute; /* Cubre el fondo */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Negro con 50% de opacidad */
+    z-index: 1; /* Se coloca detrás del contenido principal */
 }
 
 .login-container {
-    background: rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.34);
     border-radius: 20px;
     padding: 40px 30px;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
@@ -18,15 +33,16 @@ body {
     width: 300px;
     text-align: center;
 }
-
-.login-container img {
-    width: 80px;
-    height: 80px;
+.loginLogo{
+    width: 270px;
+    height: 150px;
     margin-bottom: 20px;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
+    margin-left: 20px;
 }
-
+.iniciarSesion{
+    width: 150px;
+    height: 100px;
+}
 .login-container label {
     font-size: 14px;
     color: #fff;
@@ -39,7 +55,7 @@ body {
 .login-container input[type="password"] {
     width: 100%;
     padding: 10px;
-    margin: 10px 0;
+    margin: 10px -10px;
     border: none;
     border-radius: 5px;
     background: rgba(255, 255, 255, 0.2);
