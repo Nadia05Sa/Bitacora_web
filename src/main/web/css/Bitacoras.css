@@ -6,7 +6,7 @@ body {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    background: no-repeat center/cover url("../img/pasillo.jpg");
+    background: no-repeat center/cover url("../img/SalonCecadec.jpg");
     font-family: 'Montserrat Alternates', sans-serif;
     position: relative;
     color: #333;
@@ -41,6 +41,15 @@ h1 {
 
 form {
     margin-bottom: 20px;
+}
+form input[type="text"]{
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 14px;
 }
 
 label {

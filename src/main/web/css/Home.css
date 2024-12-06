@@ -13,7 +13,7 @@ body{
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    background: no-repeat center/cover url("../img/pasillo.jpg");
+    background: no-repeat center/cover url("../img/EscalerasD4.jpg");
     color: #333;
     position: relative; /* Para posicionar elementos absolutos como .overlay */
 }
