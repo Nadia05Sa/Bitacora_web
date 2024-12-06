@@ -1,4 +1,3 @@
-/* Estilo general del body */
 body {
     margin: 0;
     padding: 0;
@@ -7,13 +6,12 @@ body {
     justify-content: center;
     align-items: center;
     background: no-repeat center/cover url("../img/pasillo.jpg");
-    font-family: Arial, sans-serif;
-    position: relative; /* Para posicionar elementos absolutos como .overlay */
+    font-family: 'Montserrat Alternates', sans-serif;
+    position: relative;
 }
 
-/* Capa translúcida */
 .overlay {
-    position: absolute; /* Cubre el fondo */
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
