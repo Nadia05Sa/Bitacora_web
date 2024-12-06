@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Salones</title>
+    <link rel="stylesheet" href="css/Salones.css">
+</head>
+<body>
+<div class="container">
+    <h1>Gestión de Salones</h1>
+
+    <form id="salonForm">
+        <div id="message"></div>
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" placeholder="Ingrese el nombre del salón" required>
+
+        <label for="ubicacion">Ubicación:</label>
+        <input type="text" id="ubicacion" placeholder="Ingrese la ubicación del salón" required>
+
+        <label for="capacidad">Capacidad:</label>
+        <input type="text" id="capacidad" placeholder="Ingrese la capacidad del salón" required>
+
+        <button type="submit">Registrar Salón</button>
+    </form>
+
+    <div class="salones-list">
+        <h2>Lista de Salones</h2>
+        <div id="salonesList">
+            <!-- Los salones se agregarán aquí dinámicamente -->
+        </div>
+    </div>
+</div>
+<script src="js/Salones.js"></script>
+</body>
+</html>
