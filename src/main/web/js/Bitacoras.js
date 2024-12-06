@@ -1,56 +1,77 @@
-const apiBaseUrl = 'http://localhost:8080/v1/bitacoras';  // Asegúrate de que esta URL es correcta
+const apiBaseUrl = 'http://localhost:8080/v1/bitacoras';
 
-function showAlert(message, type) {
-    const alert = document.getElementById('alert');
-    alert.className = type === 'success' ? 'success' : 'error';
-    alert.textContent = message;
-    alert.style.display = 'block';
+// Mostrar mensajes
+function showMessage(message, type) {
+    const messageBox = document.getElementById('message');
+    messageBox.className = type;
+    messageBox.textContent = message;
     setTimeout(() => {
-        alert.style.display = 'none';
+        messageBox.className = '';
+        messageBox.textContent = '';
     }, 3000);
 }
 
+// Cargar lista de bitácoras
 function cargarBitacoras() {
     fetch(apiBaseUrl)
-        .then((response) => response.json())
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Error en la solicitud');
+            }
+            return response.json();
+        })
         .then((data) => {
-            const bitacoras = data.response.bitacora;  // Asegúrate de que `bitacora` está correctamente definido en la respuesta
+            const bitacoras = data.data;  // Asegúrate de que `data` esté correctamente definido en la respuesta
+            console.log(bitacoras);  // Agrega esto para ver los datos que se están obteniendo
             const bitacoraList = document.getElementById('bitacoraList');
             bitacoraList.innerHTML = '';
 
             bitacoras.forEach((bitacora) => {
                 const div = document.createElement('div');
-                div.className = 'equipo-item';
+                div.className = 'bitacora-item';
+
+                // Si hay una imagen en base64, la mostramos
+                let imgHtml = '';
+                if (bitacora.foto) {
+                    imgHtml = `<img src="data:image/jpeg;base64,${bitacora.foto}" alt="Imagen de la bitácora" class="bitacora-img"/>`;
+                }
+
                 div.innerHTML = `
-                        <p><strong>Fecha:</strong> ${bitacora.fecha}</p>
-                        <p><strong>Hora Entrada:</strong> ${bitacora.horaEntrada}</p>
-                        <p><strong>Hora Salida:</strong> ${bitacora.horaSalida}</p>
-                        <p><strong>Maestro:</strong> ${bitacora.maestro}</p>
-                        <p><strong>Grado:</strong> ${bitacora.grado}</p>
-                        <p><strong>Grupo:</strong> ${bitacora.grupo}</p>
-                        <p><strong>Descripción:</strong> ${bitacora.descripcion}</p>
-                        <div class="equipo-actions">
-                            <button onclick="eliminarBitacora(${bitacora.id})">Eliminar</button>
-                        </div>
-                    `;
+                    ${imgHtml}
+                    <p><strong>Fecha:</strong> ${bitacora.fecha}</p>
+                    <p><strong>Hora Entrada:</strong> ${bitacora.horaEntrada}</p>
+                    <p><strong>Hora Salida:</strong> ${bitacora.horaSalida}</p>
+                    <p><strong>Maestro:</strong> ${bitacora.maestro}</p>
+                    <p><strong>Grado:</strong> ${bitacora.grado}</p>
+                    <p><strong>Grupo:</strong> ${bitacora.grupo}</p>
+                    <p><strong>Descripción:</strong> ${bitacora.descripcion}</p>
+                    <div class="bitacora-actions">
+                        <button onclick="eliminarBitacora(${bitacora.id})">Eliminar</button>
+                    </div>
+                `;
                 bitacoraList.appendChild(div);
             });
         })
-        .catch(() => showAlert('Error al cargar las bitácoras', 'error'));
+        .catch((error) => {
+            console.error('Error al cargar las bitácoras:', error);
+            showMessage('Error al cargar las bitácoras', 'error');
+        });
 }
 
+// Eliminar bitácora
 function eliminarBitacora(id) {
-    if (confirm('¿Estás seguro de eliminar esta bitácora?')) {
-        fetch(`${apiBaseUrl}/${id}`, { method: 'DELETE' })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Error al eliminar la bitácora');
-                }
-                showAlert('Bitácora eliminada con éxito', 'success');
-                cargarBitacoras();
-            })
-            .catch(() => showAlert('Error al eliminar la bitácora', 'error'));
-    }
+    fetch(`${apiBaseUrl}/${id}`, {
+        method: 'DELETE',
+    })
+        .then((response) => {
+            if (!response.ok) throw new Error('Error al eliminar la bitácora');
+            showMessage('Bitácora eliminada con éxito', 'success');
+            cargarBitacoras();  // Recargar la lista después de eliminar
+        })
+        .catch((error) => {
+            showMessage(error.message, 'error');
+        });
 }
 
+// Cargar bitácoras al inicio
 cargarBitacoras();

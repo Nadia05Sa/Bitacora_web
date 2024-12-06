@@ -115,12 +115,27 @@
         .empleado-actions button:hover {
             background: #d32f2f;
         }
+
+        /* Estilo para el formulario de edición */
+        #editForm {
+            display: none;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        #editForm input, #editForm select {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>Gestión de Empleados</h1>
 
+    <!-- Formulario de Registro de Técnico -->
     <form id="empleadoForm">
         <div id="message"></div>
         <label for="nombre">Nombre:</label>
@@ -144,6 +159,23 @@
         <button type="submit">Registrar Empleado</button>
     </form>
 
+    <!-- Formulario de Edición de Técnico -->
+    <div id="editForm">
+        <h3>Editar Técnico</h3>
+        <form id="editarEmpleadoForm">
+            <input type="text" id="editNombre" placeholder="Nombre" required>
+            <input type="text" id="editApellido" placeholder="Apellido" required>
+            <input type="email" id="editCorreo" placeholder="Correo" required>
+            <input type="password" id="editContrasena" placeholder="Contraseña">
+            <select id="editTipo">
+                <option value="Tecnico">Técnico</option>
+                <option value="AdminBitacora">AdminBitacora</option>
+            </select>
+            <button type="submit">Guardar Cambios</button>
+        </form>
+    </div>
+
+    <!-- Lista de Técnicos -->
     <div class="empleados-list">
         <h2>Lista de Empleados</h2>
         <div id="empleadosList">

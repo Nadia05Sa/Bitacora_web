@@ -1,5 +1,5 @@
 const apiBaseUrl = 'http://localhost:8080/v1/alumnos'; // URL base del backend
-const adminRole = true; // Asume que se determina desde el backend al iniciar sesión
+let adminRole = true; // Este valor debe ser asignado según la sesión del usuario
 
 // Mostrar mensajes de éxito o error
 function showMessage(message, type) {
@@ -13,7 +13,7 @@ function showMessage(message, type) {
 }
 
 // Registrar un alumno
-document.getElementById('alumnoForm').addEventListener('submit', function (e) {
+document.getElementById('alumnoForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
     if (!adminRole) {
@@ -35,57 +35,59 @@ document.getElementById('alumnoForm').addEventListener('submit', function (e) {
         return;
     }
 
-    fetch(apiBaseUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(alumno)
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.codigo === 201) {
-                showMessage(data.message, 'success');
-                document.getElementById('alumnoForm').reset();
-                cargarAlumnos();
-            } else {
-                throw new Error(data.message);
-            }
-        })
-        .catch(error => showMessage(error.message, 'error'));
+    try {
+        const response = await fetch(apiBaseUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(alumno)
+        });
+        const data = await response.json();
+        if (data.codigo === 201) {
+            showMessage(data.message, 'success');
+            document.getElementById('alumnoForm').reset();
+            cargarAlumnos();
+        } else {
+            throw new Error(data.message);
+        }
+    } catch (error) {
+        showMessage(error.message, 'error');
+    }
 });
 
 // Cargar lista de alumnos
-function cargarAlumnos() {
-    fetch(apiBaseUrl)
-        .then(response => response.json())
-        .then(data => {
-            if (data.codigo === 200) {
-                const alumnosList = document.getElementById('alumnosList');
-                alumnosList.innerHTML = '';
-                data.data.forEach(alumno => {
-                    const div = document.createElement('div');
-                    div.className = 'alumno-item';
-                    div.innerHTML = `
-                        <div>
-                            <strong>${alumno.nombre} ${alumno.apellido}</strong>
-                            <p>Matrícula: ${alumno.matricula}</p>
-                            <p>Correo: ${alumno.correo}</p>
-                            <div class="alumno-actions">
-                                ${adminRole ? `<button class="edit-button" onclick="editarAlumno(${alumno.id})">Editar</button>` : ''}
-                                ${adminRole ? `<button onclick="eliminarAlumno(${alumno.id})">Eliminar</button>` : ''}
-                            </div>
+async function cargarAlumnos() {
+    try {
+        const response = await fetch(apiBaseUrl);
+        const data = await response.json();
+        if (data.codigo === 200) {
+            const alumnosList = document.getElementById('alumnosList');
+            alumnosList.innerHTML = '';
+            data.data.forEach(alumno => {
+                const div = document.createElement('div');
+                div.className = 'alumno-item';
+                div.innerHTML = `
+                    <div>
+                        <strong>${alumno.nombre} ${alumno.apellido}</strong>
+                        <p>Matrícula: ${alumno.matricula}</p>
+                        <p>Correo: ${alumno.correo}</p>
+                        <div class="alumno-actions">
+                            ${adminRole ? `<button class="edit-button" onclick="editarAlumno('${alumno.correo}')">Editar</button>` : ''}
+                            ${adminRole ? `<button onclick="eliminarAlumno('${alumno.correo}')">Eliminar</button>` : ''}
                         </div>
-                    `;
-                    alumnosList.appendChild(div);
-                });
-            } else {
-                throw new Error(data.message);
-            }
-        })
-        .catch(error => showMessage(error.message, 'error'));
+                    </div>
+                `;
+                alumnosList.appendChild(div);
+            });
+        } else {
+            throw new Error(data.message);
+        }
+    } catch (error) {
+        showMessage(error.message, 'error');
+    }
 }
 
 // Eliminar un alumno
-function eliminarAlumno(id) {
+async function eliminarAlumno(correo) {
     if (!adminRole) {
         showMessage('No tienes permisos para eliminar alumnos', 'error');
         return;
@@ -93,67 +95,66 @@ function eliminarAlumno(id) {
 
     if (!confirm('¿Seguro que deseas eliminar este alumno?')) return;
 
-    fetch(`${apiBaseUrl}/${id}`, { method: 'DELETE' })
-        .then(response => {
-            if (response.status === 204) {
-                showMessage('Alumno eliminado con éxito.', 'success');
-                cargarAlumnos();
-            } else {
-                return response.json().then(data => { throw new Error(data.message); });
-            }
-        })
-        .catch(error => showMessage(error.message, 'error'));
+    try {
+        const response = await fetch(`${apiBaseUrl}/${correo}`, { method: 'DELETE' });
+        if (response.status === 204) {
+            showMessage('Alumno eliminado con éxito.', 'success');
+            cargarAlumnos();
+        } else {
+            const data = await response.json();
+            throw new Error(data.message);
+        }
+    } catch (error) {
+        showMessage(error.message, 'error');
+    }
 }
 
 // Editar un alumno usando SweetAlert2
-function editarAlumno(id) {
-    fetch(`${apiBaseUrl}/${id}`)
-        .then(response => response.json())
-        .then(data => {
-            const alumno = data.data;
-            Swal.fire({
-                title: 'Editar Alumno',
-                html: `
-                    <label>Nombre:</label>
-                    <input id="edit-nombre" class="swal2-input" value="${alumno.nombre}">
-                    <label>Apellido:</label>
-                    <input id="edit-apellido" class="swal2-input" value="${alumno.apellido}">
-                    <label>Matrícula:</label>
-                    <input id="edit-matricula" class="swal2-input" value="${alumno.matricula}">
-                    <label>Correo:</label>
-                    <input id="edit-correo" class="swal2-input" value="${alumno.correo}">
-                `,
-                focusConfirm: false,
-                preConfirm: () => {
-                    return {
-                        nombre: document.getElementById('edit-nombre').value,
-                        apellido: document.getElementById('edit-apellido').value,
-                        matricula: document.getElementById('edit-matricula').value,
-                        correo: document.getElementById('edit-correo').value
-                    };
-                }
-            }).then(result => {
-                if (result.isConfirmed) {
-                    const alumno = result.value;
-                    fetch(`${apiBaseUrl}/${id}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(alumno)
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.codigo === 200) {
-                                showMessage(data.message, 'success');
-                                cargarAlumnos();
-                            } else {
-                                throw new Error(data.message);
-                            }
-                        })
-                        .catch(error => showMessage(error.message, 'error'));
-                }
+async function editarAlumno(correo) {
+    try {
+        const response = await fetch(`${apiBaseUrl}/${correo}`);
+        const data = await response.json();
+        const alumno = data.data;
+
+        const result = await Swal.fire({
+            title: 'Editar Alumno',
+            html: `
+                <label>Nombre:</label>
+                <input id="edit-nombre" class="swal2-input" value="${alumno.nombre}">
+                <label>Apellido:</label>
+                <input id="edit-apellido" class="swal2-input" value="${alumno.apellido}">
+                <label>Matrícula:</label>
+                <input id="edit-matricula" class="swal2-input" value="${alumno.matricula}">
+                <label>Correo:</label>
+                <input id="edit-correo" class="swal2-input" value="${alumno.correo}">
+            `,
+            focusConfirm: false,
+            preConfirm: () => ({
+                nombre: document.getElementById('edit-nombre').value,
+                apellido: document.getElementById('edit-apellido').value,
+                matricula: document.getElementById('edit-matricula').value,
+                correo: document.getElementById('edit-correo').value
+            })
+        });
+
+        if (result.isConfirmed) {
+            const alumnoData = result.value;
+            const putResponse = await fetch(`${apiBaseUrl}/${correo}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(alumnoData)
             });
-        })
-        .catch(error => showMessage(error.message, 'error'));
+            const putData = await putResponse.json();
+            if (putData.codigo === 200) {
+                showMessage(putData.message, 'success');
+                cargarAlumnos();
+            } else {
+                throw new Error(putData.message);
+            }
+        }
+    } catch (error) {
+        showMessage(error.message, 'error');
+    }
 }
 
 // Cargar alumnos al cargar la página

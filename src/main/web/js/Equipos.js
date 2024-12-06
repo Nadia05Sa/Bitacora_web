@@ -11,9 +11,31 @@ function showMessage(message, type) {
     }, 3000);
 }
 
-// Registrar un nuevo equipo
+// Verificar si el usuario tiene rol de admin
+function isAdmin() {
+    const token = localStorage.getItem('authToken'); // O usa sessionStorage si corresponde
+    if (!token) {
+        return false;
+    }
+
+    // Decodificar el token para obtener el rol (esto depende del tipo de token y cómo esté estructurado)
+    try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decodificar JWT (si es el caso)
+        return decodedToken.role === 'admin'; // Verificar si el rol es 'admin'
+    } catch (error) {
+        console.error('Error al decodificar el token:', error);
+        return false;
+    }
+}
+
+// Registrar un nuevo equipo (solo si es admin)
 document.getElementById('equipoForm').addEventListener('submit', function (e) {
     e.preventDefault();
+
+    if (!isAdmin()) {
+        showMessage('Acceso denegado. Solo los administradores pueden registrar equipos.', 'error');
+        return;
+    }
 
     const equipo = {
         marca: document.getElementById('marca').value,
@@ -54,8 +76,10 @@ function cargarEquipos() {
                                 <strong>${equipo.marca}</strong>
                                 <p>Modelo: ${equipo.modelo}</p>
                                 <div class="equipo-actions">
-                                    <button onclick="eliminarEquipo(${equipo.id})">Eliminar</button>
-                                    <button onclick="editarEquipo(${equipo.id})">Editar</button>
+                                    ${isAdmin() ? `
+                                        <button onclick="eliminarEquipo(${equipo.id})">Eliminar</button>
+                                        <button onclick="editarEquipo(${equipo.id})">Editar</button>
+                                    ` : ''}
                                 </div>
                             </div>
                         `;
@@ -68,8 +92,13 @@ function cargarEquipos() {
         .catch((error) => showMessage(error.message, 'error'));
 }
 
-// Eliminar un equipo
+// Eliminar un equipo (solo si es admin)
 function eliminarEquipo(id) {
+    if (!isAdmin()) {
+        showMessage('Acceso denegado. Solo los administradores pueden eliminar equipos.', 'error');
+        return;
+    }
+
     fetch(`${apiBaseUrl}/${id}`, {
         method: 'DELETE',
     })
@@ -85,8 +114,13 @@ function eliminarEquipo(id) {
         .catch((error) => showMessage(error.message, 'error'));
 }
 
-// Editar un equipo
+// Editar un equipo (solo si es admin)
 function editarEquipo(id) {
+    if (!isAdmin()) {
+        showMessage('Acceso denegado. Solo los administradores pueden editar equipos.', 'error');
+        return;
+    }
+
     const equipo = {
         marca: prompt('Nueva marca:'),
         modelo: prompt('Nuevo modelo:'),
