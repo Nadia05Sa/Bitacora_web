@@ -77,20 +77,23 @@ function eliminarTecnico(correo) {
     fetch(`${apiBaseUrl}/${correo}`, {
         method: 'DELETE',
     })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.codigo === 204) {
+        .then((response) => {
+            if (response.ok) {
                 showMessage('Técnico eliminado con éxito', 'success');
-                cargarTecnicos();
+                // Recargar la página para que ya no aparezca el técnico eliminado
+                location.reload();
             } else {
-                showMessage(data.message, 'error');
+                throw new Error('Error al eliminar el técnico');
             }
         })
-        .catch((error) => showMessage('Error al eliminar el técnico', 'error'));
+        .catch((error) => {
+            showMessage(error.message, 'error');
+        });
 }
 
+
 // Editar un técnico
-function editarTecnico(correo, nombre, apellido, correoOriginal, contrasena, tipo) {
+function editarTecnico(correoOriginal, nombre, apellido, correo, contrasena, tipo) {
     // Llenar el formulario con los datos actuales del técnico
     document.getElementById('nombre').value = nombre;
     document.getElementById('apellido').value = apellido;
@@ -116,27 +119,40 @@ function editarTecnico(correo, nombre, apellido, correoOriginal, contrasena, tip
             tipo: document.getElementById('tipo').value,
         };
 
-        fetch(`${apiBaseUrl}/${correo}`, {
+        // La URL debe incluir el correoOriginal directamente
+        fetch(`${apiBaseUrl}/${correoOriginal}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(tecnico),
         })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.codigo === 200) {
-                    showMessage(data.message, 'success');
+            .then((response) => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`Error ${response.status}: ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then((response) => {
+                if (response.codigo === 200) {
+                    showMessage(response.message, 'success');
+                    cargarTecnicos(); // Recargar la lista de técnicos después de la actualización
                     form.reset();
-                    cargarTecnicos();
                     form.querySelector('button').textContent = "Registrar Empleado";
                     form.removeEventListener('submit', updateSubmitHandler);
                     form.addEventListener('submit', submitFormHandler);
                 } else {
-                    showMessage(data.message, 'error');
+                    showMessage(response.message, 'error');
                 }
             })
-            .catch((error) => showMessage('Error al actualizar el técnico', 'error'));
+            .catch((error) => {
+                showMessage(error.message, 'error');
+            });
     });
 }
+
+
+
 
 // Función para registrar un nuevo empleado
 function submitFormHandler(e) {

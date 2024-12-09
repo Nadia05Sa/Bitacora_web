@@ -26,8 +26,15 @@ document.getElementById('salonForm').addEventListener('submit', function (e) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(salon),
     })
-        .then((response) => response.json()) // Convertir la respuesta a JSON
-        .then((data) => {
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Error al registrar el salón');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
             if (data.codigo === 201) {
                 showMessage('Salón registrado con éxito', 'success');
                 document.getElementById('salonForm').reset();
@@ -36,21 +43,26 @@ document.getElementById('salonForm').addEventListener('submit', function (e) {
                 showMessage(data.message || 'Error al registrar el salón', 'error');
             }
         })
-        .catch((error) => showMessage(error.message, 'error'));
+        .catch(error => showMessage(error.message || 'Error al registrar el salón', 'error'));
 });
 
 // Cargar lista de salones
 function cargarSalones() {
     fetch(apiBaseUrl)
-        .then((response) => response.json()) // Convertir la respuesta a JSON
-        .then((data) => {
-            console.log('Respuesta de la API:', data); // Verificar la respuesta
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Error al cargar la lista de salones');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
             const salonesList = document.getElementById('salonesList');
-            salonesList.innerHTML = ''; // Limpiar la lista actual
+            salonesList.innerHTML = '';
 
             if (data.codigo === 200 && Array.isArray(data.data) && data.data.length > 0) {
-                // Solo agregar salones si hay datos en el array
-                data.data.forEach((salon) => {
+                data.data.forEach(salon => {
                     const div = document.createElement('div');
                     div.className = 'salon-item';
                     div.innerHTML = `
@@ -70,7 +82,7 @@ function cargarSalones() {
                 salonesList.innerHTML = '<p>No hay salones disponibles.</p>';
             }
         })
-        .catch((error) => {
+        .catch(error => {
             console.error('Error al cargar los salones:', error);
             showMessage(error.message || 'Error al cargar la lista de salones', 'error');
         });
@@ -81,41 +93,80 @@ function eliminarSalon(id) {
     fetch(`${apiBaseUrl}/${id}`, {
         method: 'DELETE',
     })
-        .then((response) => response.json()) // Convertir la respuesta a JSON
-        .then((data) => {
-            if (data.codigo === 204) {
-                showMessage('Salón eliminado con éxito', 'success');
-                cargarSalones(); // Recargar lista de salones después de eliminar
-            } else {
-                showMessage(data.message || 'Error al eliminar el salón', 'error');
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Error al eliminar el salón');
+                });
             }
+            showMessage('Salón eliminado con éxito', 'success');
+            cargarSalones(); // Recargar lista de salones después de eliminar
         })
-        .catch((error) => showMessage(error.message || 'Error al eliminar el salón', 'error'));
+        .catch(error => showMessage(error.message || 'Error al eliminar el salón', 'error'));
 }
 
 // Editar un salón
 function editarSalon(id) {
-    const salon = {
-        nombre: prompt('Nombre:'),
-        ubicacion: prompt('Ubicación:'),
-        capacidad: prompt('Capacidad:'),
-    };
+    fetch(`${apiBaseUrl}/${id}`)
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Error al obtener los datos del salón');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.codigo === 200 && data.data) { // Verifica que la respuesta tenga los datos esperados
+                const salon = data.data;
+                // Llenar el formulario con los datos actuales del salón
+                document.getElementById('nombre').value = salon.nombre;
+                document.getElementById('ubicacion').value = salon.ubicacion;
+                document.getElementById('capacidad').value = salon.capacidad;
 
-    fetch(`${apiBaseUrl}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(salon),
-    })
-        .then((response) => response.json()) // Convertir la respuesta a JSON
-        .then((data) => {
-            if (data.codigo === 200) {
-                showMessage('Salón actualizado con éxito', 'success');
-                cargarSalones(); // Recargar lista de salones después de editar
+                const form = document.getElementById('salonForm');
+                form.querySelector('button').textContent = "Actualizar Salón";
+
+                // Cambiar el comportamiento del formulario para actualizar el salón
+                form.onsubmit = function (e) {
+                    e.preventDefault();
+
+                    const updatedSalon = {
+                        nombre: document.getElementById('nombre').value,
+                        ubicacion: document.getElementById('ubicacion').value,
+                        capacidad: document.getElementById('capacidad').value,
+                    };
+
+                    fetch(`${apiBaseUrl}/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updatedSalon),
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(data => {
+                                    throw new Error(data.message || 'Error al actualizar el salón');
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.codigo === 200) {
+                                showMessage('Salón actualizado con éxito', 'success');
+                                cargarSalones(); // Recargar lista de salones después de editar
+                                form.reset();
+                                form.querySelector('button').textContent = "Registrar Salón";
+                            } else {
+                                showMessage(data.message || 'Error al actualizar el salón', 'error');
+                            }
+                        })
+                        .catch(error => showMessage(error.message || 'Error al actualizar el salón', 'error'));
+                };
             } else {
-                showMessage(data.message || 'Error al actualizar el salón', 'error');
+                throw new Error(data.message || 'Datos del salón no encontrados');
             }
         })
-        .catch((error) => showMessage(error.message || 'Error al actualizar el salón', 'error'));
+        .catch(error => showMessage(error.message || 'Error al obtener los datos del salón', 'error'));
 }
 
 // Cargar salones al inicio
