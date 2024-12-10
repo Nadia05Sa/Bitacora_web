@@ -15,11 +15,20 @@ function showMessage(message, type) {
 document.getElementById('salonForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
+    if (!adminRole) {
+        showMessage('No tienes permisos para registrar Salones', 'error');
+        return;
+    }
+
     const salon = {
-        nombre: document.getElementById('nombre').value,
-        ubicacion: document.getElementById('ubicacion').value,
-        capacidad: document.getElementById('capacidad').value,
+        nombre: document.getElementById('nombre').value.trim(),
+        ubicacion: document.getElementById('ubicacion').value.trim(),
+        capacidad: document.getElementById('capacidad').value.trim(),
     };
+
+    // Desactivar el botón para evitar múltiples envíos
+    const submitButton = e.target.querySelector('button');
+    submitButton.disabled = true;
 
     fetch(apiBaseUrl, {
         method: 'POST',
@@ -43,7 +52,10 @@ document.getElementById('salonForm').addEventListener('submit', function (e) {
                 showMessage(data.message || 'Error al registrar el salón', 'error');
             }
         })
-        .catch(error => showMessage(error.message || 'Error al registrar el salón', 'error'));
+        .catch(error => showMessage(error.message || 'Error al registrar el salón', 'error'))
+        .finally(() => {
+            submitButton.disabled = false;
+        });
 });
 
 // Cargar lista de salones
@@ -65,6 +77,7 @@ function cargarSalones() {
                 data.data.forEach(salon => {
                     const div = document.createElement('div');
                     div.className = 'salon-item';
+                    div.setAttribute('data-id', salon.id);  // Agregar ID al elemento para actualizarlo
                     div.innerHTML = `
                         <div>
                             <strong>${salon.nombre}</strong>
@@ -153,7 +166,8 @@ function editarSalon(id) {
                         .then(data => {
                             if (data.codigo === 200) {
                                 showMessage('Salón actualizado con éxito', 'success');
-                                cargarSalones(); // Recargar lista de salones después de editar
+                                // Actualizar el salón en la lista sin duplicarlo
+                                actualizarSalonEnDOM(id, updatedSalon);
                                 form.reset();
                                 form.querySelector('button').textContent = "Registrar Salón";
                             } else {
@@ -167,6 +181,18 @@ function editarSalon(id) {
             }
         })
         .catch(error => showMessage(error.message || 'Error al obtener los datos del salón', 'error'));
+}
+
+// Actualizar el salón en el DOM
+function actualizarSalonEnDOM(id, updatedSalon) {
+    const salonesList = document.getElementById('salonesList');
+    const salonItem = salonesList.querySelector(`.salon-item[data-id="${id}"]`);
+
+    if (salonItem) {
+        salonItem.querySelector('strong').textContent = updatedSalon.nombre;
+        salonItem.querySelector('p:nth-child(2)').textContent = `Ubicación: ${updatedSalon.ubicacion}`;
+        salonItem.querySelector('p:nth-child(3)').textContent = `Capacidad: ${updatedSalon.capacidad}`;
+    }
 }
 
 // Cargar salones al inicio

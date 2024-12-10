@@ -18,7 +18,6 @@ function isAdmin() {
         return false;
     }
 
-    // Decodificar el token para obtener el rol (esto depende del tipo de token y cómo esté estructurado)
     try {
         const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decodificar JWT (si es el caso)
         return decodedToken.role === 'admin'; // Verificar si el rol es 'admin'
@@ -40,6 +39,7 @@ document.getElementById('equipoForm').addEventListener('submit', function (e) {
     const equipo = {
         marca: document.getElementById('marca').value,
         modelo: document.getElementById('modelo').value,
+        numeroSerie: document.getElementById('numeroSerie').value
     };
 
     fetch(apiBaseUrl, {
@@ -72,17 +72,18 @@ function cargarEquipos() {
                     const div = document.createElement('div');
                     div.className = 'equipo-item';
                     div.innerHTML = `
-                            <div>
-                                <strong>${equipo.marca}</strong>
-                                <p>Modelo: ${equipo.modelo}</p>
-                                <div class="equipo-actions">
-                                    ${isAdmin() ? `
-                                        <button onclick="eliminarEquipo(${equipo.id})">Eliminar</button>
-                                        <button onclick="editarEquipo(${equipo.id})">Editar</button>
-                                    ` : ''}
-                                </div>
+                        <div>
+                            <strong>${equipo.marca}</strong>
+                            <p>Modelo: ${equipo.modelo}</p>
+                            <p>Número de Serie: ${equipo.numeroSerie}</p>
+                            <div class="equipo-actions">
+                                ${isAdmin() ? `
+                                    <button onclick="eliminarEquipo(${equipo.id})">Eliminar</button>
+                                    <button onclick="editarEquipo(${equipo.id})">Editar</button>
+                                ` : ''}
                             </div>
-                        `;
+                        </div>
+                    `;
                     equiposList.appendChild(div);
                 });
             } else {
@@ -102,28 +103,57 @@ function eliminarEquipo(id) {
     fetch(`${apiBaseUrl}/${id}`, {
         method: 'DELETE',
     })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.codigo === 204) {
+        .then((response) => {
+            if (response.status === 204) {
                 showMessage('Equipo eliminado con éxito', 'success');
                 cargarEquipos();
             } else {
-                throw new Error(data.message);
+                return response.json().then((data) => { throw new Error(data.message); });
             }
         })
         .catch((error) => showMessage(error.message, 'error'));
 }
 
-// Editar un equipo (solo si es admin)
+// Función para abrir el modal de edición con los datos del equipo
 function editarEquipo(id) {
     if (!isAdmin()) {
         showMessage('Acceso denegado. Solo los administradores pueden editar equipos.', 'error');
         return;
     }
 
+    // Obtener los datos del equipo seleccionado
+    fetch(`${apiBaseUrl}/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.codigo === 200) {
+                document.getElementById('editEquipoId').value = id;
+                document.getElementById('editMarca').value = data.data.marca;
+                document.getElementById('editModelo').value = data.data.modelo;
+                document.getElementById('editNumeroSerie').value = data.data.numeroSerie;
+
+                // Mostrar el modal
+                document.getElementById('editEquipoModal').style.display = 'block';
+            } else {
+                throw new Error(data.message);
+            }
+        })
+        .catch(error => showMessage(error.message, 'error'));
+}
+
+// Cerrar el modal de edición
+function closeEditModal() {
+    document.getElementById('editEquipoModal').style.display = 'none';
+}
+
+// Manejar el envío del formulario de edición
+document.getElementById('editEquipoForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const id = document.getElementById('editEquipoId').value;
     const equipo = {
-        marca: prompt('Nueva marca:'),
-        modelo: prompt('Nuevo modelo:'),
+        marca: document.getElementById('editMarca').value,
+        modelo: document.getElementById('editModelo').value,
+        numeroSerie: document.getElementById('editNumeroSerie').value
     };
 
     fetch(`${apiBaseUrl}/${id}`, {
@@ -131,17 +161,18 @@ function editarEquipo(id) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(equipo),
     })
-        .then((response) => response.json())
-        .then((data) => {
+        .then(response => response.json())
+        .then(data => {
             if (data.codigo === 200) {
                 showMessage('Equipo actualizado con éxito', 'success');
+                closeEditModal();
                 cargarEquipos();
             } else {
                 throw new Error(data.message);
             }
         })
-        .catch((error) => showMessage(error.message, 'error'));
-}
+        .catch(error => showMessage(error.message, 'error'));
+});
 
 // Cargar equipos al inicio
 cargarEquipos();

@@ -1,4 +1,4 @@
-// Clave secreta simulada para decodificar (en producción, no se incluye en el frontend)
+ // Clave secreta simulada para decodificar (en producción, no se incluye en el frontend)
 const JWT_SECRET_KEY = "losmerosmerosoa4eee";
 
 // Simula la generación de un token en el backend

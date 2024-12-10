@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Salones</title>
     <link rel="stylesheet" href="css/Salones.css">
 </head>
+
 <body>
 
 <div class="overlay"></div> <!-- Capa translúcida -->
+
 <div class="container">
     <h1>Gestión de Salones</h1>
 
+    <!-- Formulario para registrar salón -->
     <form id="salonForm">
         <div id="message"></div>
         <label for="nombre">Nombre:</label>
@@ -32,7 +36,30 @@
             <!-- Los salones se agregarán aquí dinámicamente -->
         </div>
     </div>
+
+    <!-- Modal para editar salón -->
+    <div id="editarModal" class="modal">
+        <div class="modal-content">
+            <span id="cerrarModal" class="close">&times;</span>
+            <h2>Editar Salón</h2>
+            <form id="editarSalonForm">
+                <label for="nombreEditar">Nombre:</label>
+                <input type="text" id="nombreEditar" placeholder="Ingrese el nuevo nombre" required>
+
+                <label for="ubicacionEditar">Ubicación:</label>
+                <input type="text" id="ubicacionEditar" placeholder="Ingrese la nueva ubicación" required>
+
+                <label for="capacidadEditar">Capacidad:</label>
+                <input type="text" id="capacidadEditar" placeholder="Ingrese la nueva capacidad" required>
+
+                <button type="submit">Actualizar Salón</button>
+            </form>
+        </div>
+    </div>
+
 </div>
+
 <script src="js/Salones.js"></script>
 </body>
+
 </html>

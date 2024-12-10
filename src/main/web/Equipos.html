@@ -11,22 +11,50 @@
 <div class="container">
     <h1>Gestión de Equipos de Cómputo</h1>
 
+    <!-- Formulario para registrar un nuevo equipo -->
     <form id="equipoForm">
         <div id="message"></div>
+
         <label for="marca">Marca:</label>
         <input type="text" id="marca" placeholder="Ingrese la marca del equipo" required>
 
         <label for="modelo">Modelo:</label>
         <input type="text" id="modelo" placeholder="Ingrese el modelo del equipo" required>
 
+        <label for="numeroSerie">Número de Serie:</label>
+        <input type="text" id="numeroSerie" placeholder="Ingrese el número de serie del equipo" required>
+
         <button type="submit">Registrar Equipo</button>
     </form>
 
+    <!-- Lista de equipos -->
     <div class="equipos-list">
         <h2>Lista de Equipos</h2>
         <div id="equiposList">
             <!-- Los equipos se agregarán aquí dinámicamente -->
         </div>
+    </div>
+</div>
+
+<!-- Modal para editar equipos -->
+<div id="editEquipoModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h2>Editar Equipo</h2>
+        <form id="editEquipoForm">
+            <input type="hidden" id="editEquipoId">
+
+            <label for="editMarca">Marca:</label>
+            <input type="text" id="editMarca" required>
+
+            <label for="editModelo">Modelo:</label>
+            <input type="text" id="editModelo" required>
+
+            <label for="editNumeroSerie">Número de Serie:</label>
+            <input type="text" id="editNumeroSerie" required>
+
+            <button type="submit">Guardar Cambios</button>
+        </form>
     </div>
 </div>
 
