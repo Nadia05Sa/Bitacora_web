@@ -126,3 +126,25 @@ button:hover {
 .equipo-actions button:hover {
     background: #d32f2f;
 }
+
+.equipo-actions {
+    display: flex; /* Asegura que los botones estén visibles */
+    gap: 10px; /* Espaciado entre botones */
+    justify-content: flex-start; /* Alinea los botones hacia la izquierda */
+    margin-top: 10px; /* Margen superior */
+}
+
+.equipo-actions button {
+    padding: 5px 10px;
+    font-size: 14px;
+    background: #4CAF50; /* Cambia el color para visualización */
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.equipo-actions button:hover {
+    background: #45a049; /* Color de hover */
+}

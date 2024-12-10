@@ -1,178 +1,201 @@
 const apiBaseUrl = 'http://localhost:8080/v1/equipos';
 
 // Mostrar mensajes
-function showMessage(message, type) {
+function mostrarMensaje(mensaje, tipo) {
     const messageBox = document.getElementById('message');
-    messageBox.className = type;
-    messageBox.textContent = message;
+    messageBox.className = tipo;
+    messageBox.textContent = mensaje;
     setTimeout(() => {
         messageBox.className = '';
         messageBox.textContent = '';
     }, 3000);
 }
 
-// Verificar si el usuario tiene rol de admin
-function isAdmin() {
-    const token = localStorage.getItem('authToken'); // O usa sessionStorage si corresponde
-    if (!token) {
-        return false;
-    }
-
-    try {
-        const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decodificar JWT (si es el caso)
-        return decodedToken.role === 'admin'; // Verificar si el rol es 'admin'
-    } catch (error) {
-        console.error('Error al decodificar el token:', error);
-        return false;
-    }
-}
-
-// Registrar un nuevo equipo (solo si es admin)
+// Registrar un nuevo equipo
 document.getElementById('equipoForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
-    if (!isAdmin()) {
-        showMessage('Acceso denegado. Solo los administradores pueden registrar equipos.', 'error');
+    const equipo = {
+        marca: document.getElementById('marca').value.trim(),
+        modelo: document.getElementById('modelo').value.trim(),
+        numeroSerie: document.getElementById('numeroSerie').value.trim(),
+    };
+
+    // Verificar si todos los campos están completos
+    if (!equipo.marca || !equipo.modelo || !equipo.numeroSerie) {
+        mostrarMensaje('Por favor completa todos los campos.', 'error');
         return;
     }
 
-    const equipo = {
-        marca: document.getElementById('marca').value,
-        modelo: document.getElementById('modelo').value,
-        numeroSerie: document.getElementById('numeroSerie').value
-    };
+    // Desactivar el botón para evitar múltiples envíos
+    const submitButton = e.target.querySelector('button');
+    submitButton.disabled = true;
 
     fetch(apiBaseUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(equipo),
     })
-        .then((response) => response.json())
-        .then((data) => {
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Error al registrar el equipo');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
             if (data.codigo === 201) {
-                showMessage('Equipo registrado con éxito', 'success');
+                mostrarMensaje('Equipo registrado con éxito', 'success');
                 document.getElementById('equipoForm').reset();
-                cargarEquipos();
+                cargarEquipos(); // Recargar lista de equipos después de registrar
             } else {
-                throw new Error(data.message);
+                mostrarMensaje(data.message || 'Error al registrar el equipo', 'error');
             }
         })
-        .catch((error) => showMessage(error.message, 'error'));
+        .catch(error => mostrarMensaje(error.message || 'Error al registrar el equipo', 'error'))
+        .finally(() => {
+            submitButton.disabled = false;
+        });
 });
 
 // Cargar lista de equipos
 function cargarEquipos() {
     fetch(apiBaseUrl)
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.codigo === 200) {
-                const equiposList = document.getElementById('equiposList');
-                equiposList.innerHTML = '';
-                data.data.forEach((equipo) => {
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Error al cargar la lista de equipos');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            const equiposList = document.getElementById('equiposList');
+            equiposList.innerHTML = '';
+
+            if (data.codigo === 200 && Array.isArray(data.data) && data.data.length > 0) {
+                data.data.forEach(equipo => {
                     const div = document.createElement('div');
                     div.className = 'equipo-item';
+                    div.setAttribute('data-id', equipo.id);  // Agregar ID al elemento para actualizarlo
                     div.innerHTML = `
                         <div>
                             <strong>${equipo.marca}</strong>
                             <p>Modelo: ${equipo.modelo}</p>
-                            <p>Número de Serie: ${equipo.numeroSerie}</p>
+                            <p>Número de serie: ${equipo.numeroSerie}</p>
                             <div class="equipo-actions">
-                                ${isAdmin() ? `
-                                    <button onclick="eliminarEquipo(${equipo.id})">Eliminar</button>
-                                    <button onclick="editarEquipo(${equipo.id})">Editar</button>
-                                ` : ''}
+                                <button onclick="eliminarEquipo(${equipo.id})">Eliminar</button>
+                                <button onclick="editarEquipo(${equipo.id})">Editar</button>
                             </div>
                         </div>
                     `;
                     equiposList.appendChild(div);
                 });
             } else {
-                throw new Error(data.message);
+                equiposList.innerHTML = '<p>No hay equipos disponibles.</p>';
             }
         })
-        .catch((error) => showMessage(error.message, 'error'));
+        .catch(error => {
+            console.error('Error al cargar los equipos:', error);
+            mostrarMensaje(error.message || 'Error al cargar la lista de equipos', 'error');
+        });
 }
 
-// Eliminar un equipo (solo si es admin)
+// Eliminar un equipo
 function eliminarEquipo(id) {
-    if (!isAdmin()) {
-        showMessage('Acceso denegado. Solo los administradores pueden eliminar equipos.', 'error');
-        return;
-    }
-
     fetch(`${apiBaseUrl}/${id}`, {
         method: 'DELETE',
     })
-        .then((response) => {
-            if (response.status === 204) {
-                showMessage('Equipo eliminado con éxito', 'success');
-                cargarEquipos();
-            } else {
-                return response.json().then((data) => { throw new Error(data.message); });
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Error al eliminar el equipo');
+                });
             }
+            mostrarMensaje('Equipo eliminado con éxito', 'success');
+            // Eliminar el equipo en el DOM sin recargar toda la lista
+            cargarEquipos();
         })
-        .catch((error) => showMessage(error.message, 'error'));
+        .catch(error => mostrarMensaje(error.message || 'Error al eliminar el equipo', 'error'));
 }
 
-// Función para abrir el modal de edición con los datos del equipo
+// Editar un equipo
 function editarEquipo(id) {
-    if (!isAdmin()) {
-        showMessage('Acceso denegado. Solo los administradores pueden editar equipos.', 'error');
-        return;
-    }
-
-    // Obtener los datos del equipo seleccionado
     fetch(`${apiBaseUrl}/${id}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Error al obtener los datos del equipo');
+                });
+            }
+            return response.json();
+        })
         .then(data => {
-            if (data.codigo === 200) {
-                document.getElementById('editEquipoId').value = id;
-                document.getElementById('editMarca').value = data.data.marca;
-                document.getElementById('editModelo').value = data.data.modelo;
-                document.getElementById('editNumeroSerie').value = data.data.numeroSerie;
+            if (data.codigo === 200 && data.data) { // Verifica que la respuesta tenga los datos esperados
+                const equipo = data.data;
+                // Llenar el formulario con los datos actuales del equipo
+                document.getElementById('marca').value = equipo.marca;
+                document.getElementById('modelo').value = equipo.modelo;
+                document.getElementById('numeroSerie').value = equipo.numeroSerie;
 
-                // Mostrar el modal
-                document.getElementById('editEquipoModal').style.display = 'block';
+                const form = document.getElementById('equipoForm');
+                form.querySelector('button').textContent = "Actualizar Equipo";
+
+                // Cambiar el comportamiento del formulario para actualizar el equipo
+                form.onsubmit = function (e) {
+                    e.preventDefault();
+
+                    const updatedEquipo = {
+                        marca: document.getElementById('marca').value,
+                        modelo: document.getElementById('modelo').value,
+                        numeroSerie: document.getElementById('numeroSerie').value,
+                    };
+
+                    fetch(`${apiBaseUrl}/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updatedEquipo),
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(data => {
+                                    throw new Error(data.message || 'Error al actualizar el equipo');
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.codigo === 200) {
+                                mostrarMensaje('Equipo actualizado con éxito', 'success');
+                                // Actualizar el equipo en el DOM sin recargar toda la lista
+                                actualizarEquipoEnDOM(id, updatedEquipo);
+                                form.reset();
+                                form.querySelector('button').textContent = "Registrar Equipo";
+                            } else {
+                                mostrarMensaje(data.message || 'Error al actualizar el equipo', 'error');
+                            }
+                        })
+                        .catch(error => mostrarMensaje(error.message || 'Error al actualizar el equipo', 'error'));
+                };
             } else {
-                throw new Error(data.message);
+                throw new Error(data.message || 'Datos del equipo no encontrados');
             }
         })
-        .catch(error => showMessage(error.message, 'error'));
+        .catch(error => mostrarMensaje(error.message || 'Error al obtener los datos del equipo', 'error'));
 }
 
-// Cerrar el modal de edición
-function closeEditModal() {
-    document.getElementById('editEquipoModal').style.display = 'none';
+// Actualizar el equipo en el DOM
+function actualizarEquipoEnDOM(id, updatedEquipo) {
+    const equiposList = document.getElementById('equiposList');
+    const equipoItem = equiposList.querySelector(`.equipo-item[data-id="${id}"]`);
+
+    if (equipoItem) {
+        equipoItem.querySelector('strong').textContent = updatedEquipo.marca;
+        equipoItem.querySelector('p:nth-child(2)').textContent = `Modelo: ${updatedEquipo.modelo}`;
+        equipoItem.querySelector('p:nth-child(3)').textContent = `Número de serie: ${updatedEquipo.numeroSerie}`;
+    }
 }
-
-// Manejar el envío del formulario de edición
-document.getElementById('editEquipoForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const id = document.getElementById('editEquipoId').value;
-    const equipo = {
-        marca: document.getElementById('editMarca').value,
-        modelo: document.getElementById('editModelo').value,
-        numeroSerie: document.getElementById('editNumeroSerie').value
-    };
-
-    fetch(`${apiBaseUrl}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(equipo),
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.codigo === 200) {
-                showMessage('Equipo actualizado con éxito', 'success');
-                closeEditModal();
-                cargarEquipos();
-            } else {
-                throw new Error(data.message);
-            }
-        })
-        .catch(error => showMessage(error.message, 'error'));
-});
 
 // Cargar equipos al inicio
-cargarEquipos();
+document.addEventListener('DOMContentLoaded', cargarEquipos);
