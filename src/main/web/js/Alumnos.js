@@ -67,6 +67,18 @@ async function cargarAlumnos() {
                 div.className = 'alumno-item';
                 div.innerHTML = `
                     <div>
+                        <style>
+                            .overlay {
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                width: 100%;
+                                height: 100%;
+                                background-color: rgba(0, 0, 0, 0.5); /* Negro con 50% de opacidad */
+                                z-index: 1; /* Se coloca detrás del contenido principal */
+                             }
+                        </style>
+                    
                         <strong>${alumno.nombre} ${alumno.apellido}</strong>
                         <p>Matrícula: ${alumno.matricula}</p>
                         <p>Correo: ${alumno.correo}</p>
