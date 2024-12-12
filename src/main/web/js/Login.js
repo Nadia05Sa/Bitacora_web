@@ -1,82 +1,126 @@
- // Clave secreta simulada para decodificar (en producción, no se incluye en el frontend)
-const JWT_SECRET_KEY = "losmerosmerosoa4eee";
+class AuthManager {
+    // Predefined admin credentials
+    static ADMIN_EMAIL = "admin";
+    static ADMIN_PASSWORD = "admin1234";
 
-// Simula la generación de un token en el backend
-function generateToken(email, role) {
-    const header = { alg: "HS256", typ: "JWT" };
-    const payload = {
-        email: email,
-        rol: { authority: role },
-        exp: Math.floor(Date.now() / 1000) + 60 * 60 // Expira en 1 hora
-    };
-    const token = btoa(JSON.stringify(header)) + '.' + btoa(JSON.stringify(payload)) + '.signature';
-    return token;
-}
+    // Use a more secure way to generate tokens (this is still a simulation)
+    static generateToken(email, role) {
+        const payload = {
+            sub: email,  // Subject (user identifier)
+            role: role,
+            iat: Math.floor(Date.now() / 1000),  // Issued at
+            exp: Math.floor(Date.now() / 1000) + (60 * 60), // 1 hour expiration
+            jti: crypto.randomUUID() // Unique token identifier
+        };
 
-// Simula la decodificación de un token
-function decodeJWT(token) {
-    try {
-        const payload = token.split('.')[1];
-        return JSON.parse(atob(payload));
-    } catch (error) {
-        console.error("Error al decodificar el token:", error);
-        return null;
-    }
-}
-
-// Verifica si el token ha expirado
-function isTokenExpired(exp) {
-    const expirationTime = exp * 1000; // Convertir segundos a milisegundos
-    return Date.now() > expirationTime;
-}
-
-// Validar el acceso según el token
-function validateAccess(allowedRoles) {
-    const token = sessionStorage.getItem("token");
-    if (!token) {
-        alert("Debes iniciar sesión primero.");
-        window.location.href = "login.html";
-        return;
+        // In a real-world scenario, this would be a server-side JWT signing process
+        return this.mockTokenGeneration(payload);
     }
 
-    const decodedToken = decodeJWT(token);
-    if (!decodedToken) {
-        alert("Token inválido. Por favor, inicia sesión nuevamente.");
+    // Simulated token generation (replace with actual JWT library in production)
+    static mockTokenGeneration(payload) {
+        const header = { alg: "HS256", typ: "JWT" };
+        return `${btoa(JSON.stringify(header))}.${btoa(JSON.stringify(payload))}.signature`;
+    }
+
+    // Improved token decoding with more robust error handling
+    static decodeToken(token) {
+        try {
+            if (!token) throw new Error("No token provided");
+
+            const [, payloadBase64] = token.split('.');
+            const payload = JSON.parse(atob(payloadBase64));
+
+            return {
+                email: payload.sub,
+                role: payload.role,
+                expiresAt: payload.exp
+            };
+        } catch (error) {
+            console.error("Token decoding error:", error.message);
+            return null;
+        }
+    }
+
+    // Enhanced token validation
+    static validateToken() {
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+            this.redirectToLogin("Debes iniciar sesión");
+            return false;
+        }
+
+        const decodedToken = this.decodeToken(token);
+        if (!decodedToken) {
+            this.redirectToLogin("Token inválido");
+            return false;
+        }
+
+        if (this.isTokenExpired(decodedToken.expiresAt)) {
+            this.redirectToLogin("Sesión expirada");
+            return false;
+        }
+
+        return decodedToken;
+    }
+
+    // Check if token is expired
+    static isTokenExpired(expirationTime) {
+        return Date.now() / 1000 > expirationTime;
+    }
+
+    // Centralized login handling - NOW ONLY FOR ADMIN
+    static login(email, password) {
+        // Strict admin-only authentication
+        if (email !== this.ADMIN_EMAIL || password !== this.ADMIN_PASSWORD) {
+            alert("Acceso denegado. Solo administradores pueden iniciar sesión.");
+            return false;
+        }
+
+        // Generate token specifically for admin
+        const token = this.generateToken(email, "Admin");
+        sessionStorage.setItem("token", token);
+        return true;
+    }
+
+    // Centralized logout method
+    static logout() {
+        sessionStorage.removeItem("token");
+        this.redirectToLogin("Sesión cerrada");
+    }
+
+    // Role-based access control
+    static checkAccess(allowedRoles) {
+        const decodedToken = this.validateToken();
+        if (!decodedToken) return false;
+
+        if (!allowedRoles.includes(decodedToken.role)) {
+            this.redirectToLogin("Acceso no autorizado");
+            return false;
+        }
+
+        return true;
+    }
+
+    // Redirect to login with optional message
+    static redirectToLogin(message) {
+        if (message) alert(message);
         sessionStorage.clear();
         window.location.href = "login.html";
-        return;
-    }
-
-    if (isTokenExpired(decodedToken.exp)) {
-        alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
-        sessionStorage.clear();
-        window.location.href = "login.html";
-        return;
-    }
-
-    const userRole = decodedToken.rol?.authority;
-    if (!allowedRoles.includes(userRole)) {
-        alert("No tienes permisos para acceder a esta página.");
-        sessionStorage.clear();
-        window.location.href = "login.html";
     }
 }
 
-// Evento para simular el login
+// Login event listener
 document.getElementById("loginButton").addEventListener("click", function () {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    if (email && password) {
-        // Simula la autenticación y generación de token
-        const token = generateToken(email, "Admin"); // Cambiar "Admin" según el rol deseado
-        sessionStorage.setItem("token", token);
-        alert("Inicio de sesión exitoso. Redirigiendo...");
-        window.location.href = "Inicio.html"; // Cambia a la página protegida
-    } else {
-        alert("Por favor, llena todos los campos.");
+    if (AuthManager.login(email, password)) {
+        window.location.href = "Inicio.html";
     }
 });
 
-// Llama a la validación en la página protegida
-// validateAccess(["Admin", "Empleado"]); // Descomentar en la página protegida
+// On protected page
+// if (AuthManager.checkAccess(["Admin"])) {
+//     // Page-specific logic
+// }

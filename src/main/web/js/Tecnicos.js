@@ -11,78 +11,103 @@ const tipoInput = document.getElementById('tipo');
 const empleadosList = document.getElementById('empleadosList');
 const messageBox = document.getElementById('message');
 const formSubmitButton = form.querySelector('button[type="submit"]');
+const cancelEditButton = document.getElementById('cancelEdit');
 
 // Utilidades
 class UIUtils {
-    // Mostrar mensajes con mejor manejo
+    // Mostrar mensajes con mejor manejo y accesibilidad
     static showMessage(message, type = 'error') {
         messageBox.className = `message ${type}`;
         messageBox.textContent = message;
+        messageBox.setAttribute('aria-live', 'polite');
         messageBox.style.display = 'block';
 
-        // Usar animaciones y transiciones
-        setTimeout(() => {
+        // Animación de mensaje mejorada
+        requestAnimationFrame(() => {
             messageBox.style.opacity = '1';
-        }, 10);
+            messageBox.style.transform = 'translateY(0)';
+        });
 
+        // Ocultar mensaje automáticamente
         setTimeout(() => {
             messageBox.style.opacity = '0';
+            messageBox.style.transform = 'translateY(-20px)';
             setTimeout(() => {
                 messageBox.style.display = 'none';
-                messageBox.className = '';
-                messageBox.textContent = '';
+                messageBox.removeAttribute('aria-live');
             }, 500);
         }, 3000);
     }
 
-    // Validar campos del formulario
+    // Validación de formulario más robusta
     static validateForm(tecnico) {
         const errors = [];
 
-        if (!tecnico.nombre || tecnico.nombre.length < 2) {
-            errors.push('El nombre debe tener al menos 2 caracteres');
+        // Validaciones con mensajes más específicos
+        if (!tecnico.nombre || tecnico.nombre.trim().length < 2) {
+            errors.push('Nombre inválido: Debe tener al menos 2 caracteres');
         }
 
-        if (!tecnico.apellido || tecnico.apellido.length < 2) {
-            errors.push('El apellido debe tener al menos 2 caracteres');
+        if (!tecnico.apellido || tecnico.apellido.trim().length < 2) {
+            errors.push('Apellido inválido: Debe tener al menos 2 caracteres');
         }
 
         if (!tecnico.correo || !this.isValidEmail(tecnico.correo)) {
-            errors.push('Ingrese un correo electrónico válido');
+            errors.push('Correo electrónico inválido');
         }
 
-        if (!tecnico.contrasena || tecnico.contrasena.length < 6) {
-            errors.push('La contraseña debe tener al menos 6 caracteres');
+        if (!tecnico.contrasena || tecnico.contrasena.length < 8) {
+            errors.push('Contraseña inválida: Debe tener al menos 8 caracteres');
         }
 
         if (!tecnico.tipo) {
-            errors.push('Seleccione un tipo de técnico');
+            errors.push('Debe seleccionar un tipo de técnico');
         }
 
         return errors;
     }
 
-    // Validar formato de correo electrónico
+    // Validación de email más estricta
     static isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return emailRegex.test(email);
     }
 
-    // Resetear formulario
+    // Reset del formulario con gestión de estado
     static resetForm() {
         form.reset();
         formSubmitButton.textContent = 'Registrar Empleado';
         form.dataset.modo = 'crear';
+        delete form.dataset.correoOriginal;
+
+        // Ocultar botón de cancelar edición
+        if (cancelEditButton) {
+            cancelEditButton.style.display = 'none';
+        }
+
+        // Restaurar eventos originales
         form.removeEventListener('submit', updateSubmitHandler);
         form.addEventListener('submit', submitFormHandler);
+
+        // Restaurar foco
+        nombreInput.focus();
+    }
+
+    // Habilitar/Deshabilitar controles del formulario
+    static toggleFormControls(disabled = false) {
+        const formControls = form.querySelectorAll('input, select, button');
+        formControls.forEach(control => {
+            control.disabled = disabled;
+        });
     }
 }
 
-// Servicio de API
+// Servicio de API con manejo de errores mejorado
 class TecnicoService {
-    // Método genérico para realizar solicitudes
     static async fetchAPI(url, method = 'GET', body = null) {
         try {
+            UIUtils.toggleFormControls(true); // Deshabilitar controles durante la solicitud
+
             const options = {
                 method,
                 headers: {
@@ -98,71 +123,86 @@ class TecnicoService {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                throw new Error(`Error ${response.status}: ${errorText}`);
             }
 
             return await response.json();
         } catch (error) {
-            UIUtils.showMessage(`Error de red: ${error.message}`);
+            UIUtils.showMessage(`Error: ${error.message}`, 'error');
             throw error;
+        } finally {
+            UIUtils.toggleFormControls(false); // Rehabilitar controles
         }
     }
 
-    // Obtener todos los técnicos
+    // Métodos de API con manejo de errores similar
     static async obtenerTecnicos() {
         try {
             const data = await this.fetchAPI(API_BASE_URL);
-
-            if (data.codigo !== 200) {
-                throw new Error(data.message || 'Error al cargar técnicos');
-            }
-
-            return data.data;
+            return data.codigo === 200 ? data.data : [];
         } catch (error) {
-            UIUtils.showMessage(error.message);
             return [];
         }
     }
 
-    // Registrar técnico
     static async registrarTecnico(tecnico) {
         return this.fetchAPI(API_BASE_URL, 'POST', tecnico);
     }
 
-    // Actualizar técnico
     static async actualizarTecnico(correoOriginal, tecnico) {
         return this.fetchAPI(`${API_BASE_URL}/${correoOriginal}`, 'PUT', tecnico);
     }
 
-    // Eliminar técnico
     static async eliminarTecnico(correo) {
         return this.fetchAPI(`${API_BASE_URL}/${correo}`, 'DELETE');
     }
 }
 
-// Renderizar lista de técnicos
+// Renderizado de lista de técnicos con mejoras
 async function renderizarTecnicos() {
     try {
-        empleadosList.innerHTML = '<div class="loading">Cargando técnicos...</div>';
+        empleadosList.innerHTML = '<div class="loading" aria-busy="true">Cargando técnicos...</div>';
         const tecnicos = await TecnicoService.obtenerTecnicos();
 
-        empleadosList.innerHTML = tecnicos.length
-            ? tecnicos.map(tecnico => `
-                <div class="empleado-item">
-                    <div>
-                        <strong>${tecnico.nombre} ${tecnico.apellido}</strong>
-                        <p><strong>Correo:</strong> ${tecnico.correo}</p>
-                        <p><strong>Tipo:</strong> ${tecnico.tipo}</p>
-                        <div class="empleado-actions">
-                            <button onclick="eliminarTecnico('${tecnico.correo}')">Eliminar</button>
-                            <button onclick="prepararEdicion('${tecnico.correo}', '${tecnico.nombre}', '${tecnico.apellido}', '${tecnico.contrasena}', '${tecnico.tipo}')">Editar</button>
-                        </div>
-                    </div>
+        if (tecnicos.length === 0) {
+            empleadosList.innerHTML = `
+                <div class="empty-list" aria-live="polite">
+                    <p>No hay técnicos registrados</p>
+                    <p>Comience agregando un nuevo técnico</p>
                 </div>
-            `).join('')
-            : '<div class="empty-list">No hay técnicos registrados</div>';
+            `;
+            return;
+        }
+
+        empleadosList.innerHTML = tecnicos.map(tecnico => `
+            <div class="empleado-item" data-correo="${tecnico.correo}">
+                <div class="empleado-info">
+                    <h3>${tecnico.nombre} ${tecnico.apellido}</h3>
+                    <p><strong>Correo:</strong> ${tecnico.correo}</p>
+                    <p><strong>Tipo:</strong> ${tecnico.tipo}</p>
+                </div>
+                <div class="empleado-actions">
+                    <button 
+                        onclick="eliminarTecnico('${tecnico.correo}')" 
+                        aria-label="Eliminar técnico ${tecnico.nombre} ${tecnico.apellido}"
+                    >
+                        Eliminar
+                    </button>
+                    <button 
+                        onclick="prepararEdicion('${tecnico.correo}', '${tecnico.nombre}', '${tecnico.apellido}', '${tecnico.contrasena}', '${tecnico.tipo}')"
+                        aria-label="Editar técnico ${tecnico.nombre} ${tecnico.apellido}"
+                    >
+                        Editar
+                    </button>
+                </div>
+            </div>
+        `).join('');
     } catch (error) {
-        empleadosList.innerHTML = '<div class="error">Error al cargar técnicos</div>';
+        empleadosList.innerHTML = `
+            <div class="error" aria-live="assertive">
+                Error al cargar técnicos. Intente nuevamente.
+            </div>
+        `;
     }
 }
 
@@ -181,7 +221,7 @@ async function submitFormHandler(e) {
     const errors = UIUtils.validateForm(tecnico);
 
     if (errors.length > 0) {
-        UIUtils.showMessage(errors.join(', '));
+        UIUtils.showMessage(errors.join(' | '));
         return;
     }
 
@@ -196,11 +236,11 @@ async function submitFormHandler(e) {
             UIUtils.showMessage(response.message || 'Error al registrar técnico');
         }
     } catch (error) {
-        UIUtils.showMessage(error.message);
+        UIUtils.showMessage('No se pudo registrar el técnico');
     }
 }
 
-// Preparar formulario para edición
+// Preparar formulario para edición con más contexto
 function prepararEdicion(correo, nombre, apellido, contrasena, tipo) {
     nombreInput.value = nombre;
     apellidoInput.value = apellido;
@@ -212,12 +252,25 @@ function prepararEdicion(correo, nombre, apellido, contrasena, tipo) {
     form.dataset.modo = 'editar';
     form.dataset.correoOriginal = correo;
 
+    // Mostrar botón de cancelar edición
+    if (cancelEditButton) {
+        cancelEditButton.style.display = 'block';
+    }
+
     // Remover listener anterior y añadir nuevo para actualización
     form.removeEventListener('submit', submitFormHandler);
     form.addEventListener('submit', updateSubmitHandler);
+
+    // Resaltar elemento en edición
+    const empleadoItems = empleadosList.querySelectorAll('.empleado-item');
+    empleadoItems.forEach(item => item.classList.remove('editing'));
+    const currentItem = empleadosList.querySelector(`[data-correo="${correo}"]`);
+    if (currentItem) {
+        currentItem.classList.add('editing');
+    }
 }
 
-// Manejador de actualización
+// Manejador de actualización con validaciones
 async function updateSubmitHandler(e) {
     e.preventDefault();
 
@@ -233,7 +286,7 @@ async function updateSubmitHandler(e) {
     const errors = UIUtils.validateForm(tecnico);
 
     if (errors.length > 0) {
-        UIUtils.showMessage(errors.join(', '));
+        UIUtils.showMessage(errors.join(' | '));
         return;
     }
 
@@ -248,13 +301,15 @@ async function updateSubmitHandler(e) {
             UIUtils.showMessage(response.message || 'Error al actualizar técnico');
         }
     } catch (error) {
-        UIUtils.showMessage(error.message);
+        UIUtils.showMessage('No se pudo actualizar el técnico');
     }
 }
 
-// Eliminar técnico
+// Eliminar técnico con confirmación mejorada
 async function eliminarTecnico(correo) {
-    if (!confirm('¿Estás seguro de que deseas eliminar a este técnico?')) return;
+    const confirmacion = confirm('¿Está seguro de eliminar este técnico? Esta acción no se puede deshacer.');
+
+    if (!confirmacion) return;
 
     try {
         const response = await TecnicoService.eliminarTecnico(correo);
@@ -266,12 +321,29 @@ async function eliminarTecnico(correo) {
             UIUtils.showMessage(response.message || 'Error al eliminar técnico');
         }
     } catch (error) {
-        UIUtils.showMessage(error.message);
+        UIUtils.showMessage('No se pudo eliminar el técnico');
+    }
+}
+
+// Cancelar edición
+function cancelarEdicion() {
+    UIUtils.resetForm();
+    const editingItem = empleadosList.querySelector('.empleado-item.editing');
+    if (editingItem) {
+        editingItem.classList.remove('editing');
     }
 }
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', submitFormHandler);
+
+    // Añadir evento de cancelar edición si existe el botón
+    const cancelEditButton = document.getElementById('cancelEdit');
+    if (cancelEditButton) {
+        cancelEditButton.addEventListener('click', cancelarEdicion);
+        cancelEditButton.style.display = 'none'; // Ocultar inicialmente
+    }
+
     renderizarTecnicos();
 });
