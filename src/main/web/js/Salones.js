@@ -11,7 +11,10 @@ function showMessage(message, type) {
     }, 3000);
 }
 
-// Registrar un nuevo salón
+// Variable para rastrear el modo de edición
+let editingId = null;
+
+// Registrar un nuevo salón o actualizar uno existente
 document.getElementById('salonForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -25,33 +28,50 @@ document.getElementById('salonForm').addEventListener('submit', function (e) {
     const submitButton = e.target.querySelector('button');
     submitButton.disabled = true;
 
-    fetch(apiBaseUrl, {
-        method: 'POST',
+    // Determinar si es una actualización o un nuevo registro
+    const method = editingId ? 'PUT' : 'POST';
+    const url = editingId ? `${apiBaseUrl}/${editingId}` : apiBaseUrl;
+
+    fetch(url, {
+        method: method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(salon),
     })
         .then(response => {
             if (!response.ok) {
                 return response.json().then(data => {
-                    throw new Error(data.message || 'Error al registrar el salón');
+                    throw new Error(data.message || (editingId ? 'Error al actualizar el salón' : 'Error al registrar el salón'));
                 });
             }
             return response.json();
         })
         .then(data => {
-            if (data.codigo === 201) {
-                showMessage('Salón registrado con éxito', 'success');
+            if (data.codigo === 200 || data.codigo === 201) {
+                const message = editingId ? 'Salón actualizado con éxito' : 'Salón registrado con éxito';
+                showMessage(message, 'success');
+
+                // Resetear formulario y estado de edición
                 document.getElementById('salonForm').reset();
-                cargarSalones(); // Recargar lista de salones después de registrar
+                resetFormToCreateMode();
+
+                // Recargar lista de salones
+                cargarSalones();
             } else {
-                showMessage(data.message || 'Error al registrar el salón', 'error');
+                showMessage(data.message || 'Error en la operación', 'error');
             }
         })
-        .catch(error => showMessage(error.message || 'Error al registrar el salón', 'error'))
+        .catch(error => showMessage(error.message, 'error'))
         .finally(() => {
             submitButton.disabled = false;
         });
 });
+
+// Restablecer el formulario al modo de creación
+function resetFormToCreateMode() {
+    const form = document.getElementById('salonForm');
+    form.querySelector('button').textContent = "Registrar Salón";
+    editingId = null;
+}
 
 // Cargar lista de salones
 function cargarSalones() {
@@ -72,7 +92,7 @@ function cargarSalones() {
                 data.data.forEach(salon => {
                     const div = document.createElement('div');
                     div.className = 'salon-item';
-                    div.setAttribute('data-id', salon.id);  // Agregar ID al elemento para actualizarlo
+                    div.setAttribute('data-id', salon.id);
                     div.innerHTML = `
                         <div>
                             <strong>${salon.nombre}</strong>
@@ -108,7 +128,7 @@ function eliminarSalon(id) {
                 });
             }
             showMessage('Salón eliminado con éxito', 'success');
-            cargarSalones(); // Recargar lista de salones después de eliminar
+            cargarSalones();
         })
         .catch(error => showMessage(error.message || 'Error al eliminar el salón', 'error'));
 }
@@ -125,69 +145,22 @@ function editarSalon(id) {
             return response.json();
         })
         .then(data => {
-            if (data.codigo === 200 && data.data) { // Verifica que la respuesta tenga los datos esperados
+            if (data.codigo === 200 && data.data) {
                 const salon = data.data;
                 // Llenar el formulario con los datos actuales del salón
                 document.getElementById('nombre').value = salon.nombre;
                 document.getElementById('ubicacion').value = salon.ubicacion;
                 document.getElementById('capacidad').value = salon.capacidad;
 
+                // Establecer el ID de edición y cambiar el texto del botón
+                editingId = id;
                 const form = document.getElementById('salonForm');
                 form.querySelector('button').textContent = "Actualizar Salón";
-
-                // Cambiar el comportamiento del formulario para actualizar el salón
-                form.onsubmit = function (e) {
-                    e.preventDefault();
-
-                    const updatedSalon = {
-                        nombre: document.getElementById('nombre').value,
-                        ubicacion: document.getElementById('ubicacion').value,
-                        capacidad: document.getElementById('capacidad').value,
-                    };
-
-                    fetch(`${apiBaseUrl}/${id}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(updatedSalon),
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                return response.json().then(data => {
-                                    throw new Error(data.message || 'Error al actualizar el salón');
-                                });
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.codigo === 200) {
-                                showMessage('Salón actualizado con éxito', 'success');
-                                // Actualizar el salón en la lista sin duplicarlo
-                                actualizarSalonEnDOM(id, updatedSalon);
-                                form.reset();
-                                form.querySelector('button').textContent = "Registrar Salón";
-                            } else {
-                                showMessage(data.message || 'Error al actualizar el salón', 'error');
-                            }
-                        })
-                        .catch(error => showMessage(error.message || 'Error al actualizar el salón', 'error'));
-                };
             } else {
                 throw new Error(data.message || 'Datos del salón no encontrados');
             }
         })
         .catch(error => showMessage(error.message || 'Error al obtener los datos del salón', 'error'));
-}
-
-// Actualizar el salón en el DOM
-function actualizarSalonEnDOM(id, updatedSalon) {
-    const salonesList = document.getElementById('salonesList');
-    const salonItem = salonesList.querySelector(`.salon-item[data-id="${id}"]`);
-
-    if (salonItem) {
-        salonItem.querySelector('strong').textContent = updatedSalon.nombre;
-        salonItem.querySelector('p:nth-child(2)').textContent = `Ubicación: ${updatedSalon.ubicacion}`;
-        salonItem.querySelector('p:nth-child(3)').textContent = `Capacidad: ${updatedSalon.capacidad}`;
-    }
 }
 
 // Cargar salones al inicio
