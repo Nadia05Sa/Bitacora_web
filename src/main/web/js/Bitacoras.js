@@ -37,7 +37,7 @@ function cargarBitacoras() {
                 }
 
                 div.innerHTML = `
-                    ${imgHtml}
+                    <img style="width: 30vh" src="${imgHtml}" alt="Evidencia">
                     <p><strong>Fecha:</strong> ${bitacora.fecha}</p>
                     <p><strong>Hora Entrada:</strong> ${bitacora.horaEntrada}</p>
                     <p><strong>Hora Salida:</strong> ${bitacora.horaSalida}</p>
