@@ -175,31 +175,6 @@ async function renderizarTecnicos() {
         }
 
         empleadosList.innerHTML = tecnicos.map(tecnico => `
-            <style>
-                body {
-                    margin: 0;
-                    padding: 0;
-                    display: flex;
-                    height: 100%;
-                    flex-direction: column;
-                    justify-content: flex-start;
-                    align-items: center;
-                    background: no-repeat center/cover url("../img/SalonCC11D4_2.jpg");
-                    font-family: 'Montserrat Alternates', sans-serif;
-                    position: relative;
-                    color: #333;
-                }
-                
-                .overlay {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background-color: rgba(0, 0, 0, 0.5); /* Negro con 50% de opacidad */
-                    z-index: 1; /* Se coloca detrás del contenido principal */
-                }
-            </style>
             <div class="empleado-item" data-correo="${tecnico.correo}">
                 <div class="empleado-info">
                     <h3>${tecnico.nombre} ${tecnico.apellido}</h3>
