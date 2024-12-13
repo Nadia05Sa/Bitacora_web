@@ -109,13 +109,23 @@ button:hover {
     margin-top: 10px;
     padding: 5px 10px;
     font-size: 14px;
-    background: #f44336;
     color: white;
     border: none;
     border-radius: 3px;
     cursor: pointer;
 }
 
-.equipo-actions button:hover {
+.equipo-actions button .eliminar {
+    background: #f44336;
+}
+
+.equipo-actions button:hover .eliminar {
     background: #d32f2f;
+}
+.equipo-actions button .editar{
+    background: #3656f4;
+}
+
+.equipo-actions button:hover .editar{
+    background: #2f3dd3;
 }

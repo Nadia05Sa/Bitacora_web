@@ -37,6 +37,31 @@ function cargarBitacoras() {
                 }
 
                 div.innerHTML = `
+                    <style>
+                        body {
+                            margin: 0;
+                            padding: 0;
+                            display: flex;
+                            height: 100%;
+                            flex-direction: column;
+                            justify-content: flex-start;
+                            align-items: center;
+                            background: no-repeat center/cover url("../img/SalonCecadec.jpg");
+                            font-family: 'Montserrat Alternates', sans-serif;
+                            position: relative;
+                            color: #333;
+                        }
+                        
+                        .overlay {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background-color: rgba(0, 0, 0, 0.5); /* Negro con 50% de opacidad */
+                            z-index: 1; /* Se coloca detrás del contenido principal */
+                        }
+                    </style>
                     ${imgHtml}
                     <p><strong>Fecha:</strong> ${bitacora.fecha}</p>
                     <p><strong>Hora Entrada:</strong> ${bitacora.horaEntrada}</p>

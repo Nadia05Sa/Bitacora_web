@@ -66,13 +66,38 @@ async function cargarAlumnos() {
                 const div = document.createElement('div');
                 div.className = 'alumno-item';
                 div.innerHTML = `
+                    <style>
+                        body {
+                            margin: 0;
+                            padding: 0;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: flex-start;
+                            align-items: center;
+                            height: 100%;
+                            background: no-repeat center/cover url("../img/salonConPersonas.jpg");
+                            font-family: 'Montserrat Alternates', sans-serif;
+                            position: relative;
+                            color: #333;
+                        }
+                        
+                        .overlay {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background-color: rgba(0, 0, 0, 0.5);
+                            z-index: 1;
+                        }
+                    </style>
                     <div>
                         <strong>${alumno.nombre} ${alumno.apellido}</strong>
                         <p>Matrícula: ${alumno.matricula}</p>
                         <p>Correo: ${alumno.correo}</p>
                         <div class="alumno-actions">
-                            ${adminRole ? `<button class="edit-button" onclick="editarAlumno('${alumno.correo}')">Editar</button>` : ''}
-                            ${adminRole ? `<button onclick="eliminarAlumno('${alumno.correo}')">Eliminar</button>` : ''}
+                            ${adminRole ? `<button class="editar" class="edit-button" onclick="editarAlumno('${alumno.correo}')">Editar</button>` : ''}
+                            ${adminRole ? `<button class="eliminar" onclick="eliminarAlumno('${alumno.correo}')">Eliminar</button>` : ''}
                         </div>
                     </div>
                 `;

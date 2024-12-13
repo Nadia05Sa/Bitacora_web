@@ -94,13 +94,38 @@ function cargarSalones() {
                     div.className = 'salon-item';
                     div.setAttribute('data-id', salon.id);
                     div.innerHTML = `
+                        <style>
+                             body {
+                                margin: 0;
+                                padding: 0;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: flex-start;
+                                align-items: center;
+                                height: 100%;
+                                background: no-repeat center/cover url("../img/salonConPersonas.jpg");
+                                font-family: 'Montserrat Alternates', sans-serif;
+                                position: relative;
+                                color: #333;
+                            }
+                            
+                            .overlay {
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                width: 100%;
+                                height: 100%;
+                                background-color: rgba(0, 0, 0, 0.5);
+                                z-index: 1;
+                            }
+                        </style>
                         <div>
                             <strong>${salon.nombre}</strong>
                             <p>Ubicación: ${salon.ubicacion}</p>
                             <p>Capacidad: ${salon.capacidad}</p>
                             <div class="salon-actions">
-                                <button onclick="eliminarSalon(${salon.id})">Eliminar</button>
-                                <button onclick="editarSalon(${salon.id})">Editar</button>
+                                <button class="eliminar" onclick="eliminarSalon(${salon.id})">Eliminar</button>
+                                <button class="editar" onclick="editarSalon(${salon.id})">Editar</button>
                             </div>
                         </div>
                     `;
