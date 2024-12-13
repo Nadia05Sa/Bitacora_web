@@ -37,6 +37,15 @@ function cargarBitacoras() {
                 }
 
                 div.innerHTML = `
+                        <style>
+                             body {
+                                height: 100%;
+                            }
+                            
+                            .overlay {
+                                height: 100%;
+                            }
+                        </style>
                     <img style="width: 30vh" src="${imgHtml}" alt="Evidencia">
                     <p><strong>Fecha:</strong> ${bitacora.fecha}</p>
                     <p><strong>Hora Entrada:</strong> ${bitacora.horaEntrada}</p>

@@ -175,6 +175,15 @@ async function renderizarTecnicos() {
         }
 
         empleadosList.innerHTML = tecnicos.map(tecnico => `
+                        <style>
+                             body {
+                                height: 100%;
+                            }
+                            
+                            .overlay {
+                                height: 100%;
+                            }
+                        </style>
             <div class="empleado-item" data-correo="${tecnico.correo}">
                 <div class="empleado-info">
                     <h3>${tecnico.nombre} ${tecnico.apellido}</h3>

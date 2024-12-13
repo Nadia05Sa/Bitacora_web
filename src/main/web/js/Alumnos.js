@@ -66,6 +66,15 @@ async function cargarAlumnos() {
                 const div = document.createElement('div');
                 div.className = 'alumno-item';
                 div.innerHTML = `
+                        <style>
+                             body {
+                                height: 100%;
+                            }
+                            
+                            .overlay {
+                                height: 100%;
+                            }
+                        </style>
                     <div>
                         <strong>${alumno.nombre} ${alumno.apellido}</strong>
                         <p>Matrícula: ${alumno.matricula}</p>

@@ -153,6 +153,15 @@ class EquipoManager {
             }
 
             equiposList.innerHTML = equipos.map(equipo => `
+                         <style>
+                             body {
+                                height: 100%;
+                            }
+                            
+                            .overlay {
+                                height: 100%;
+                            }
+                        </style>
                 <div class="equipo-item" data-id="${equipo.id}">
                     <div class="equipo-info">
                         <h3>${equipo.marca}</h3>
