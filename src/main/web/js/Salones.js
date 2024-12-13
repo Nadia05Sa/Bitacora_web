@@ -108,8 +108,8 @@ function cargarSalones() {
                             <p>Ubicación: ${salon.ubicacion}</p>
                             <p>Capacidad: ${salon.capacidad}</p>
                             <div class="salon-actions">
-                                <button class="eliminar" onclick="eliminarSalon(${salon.id})">Eliminar</button>
-                                <button class="editar" onclick="editarSalon(${salon.id})">Editar</button>
+                                <button style="background: red" onclick="eliminarSalon(${salon.id})">Eliminar</button>
+                                <button style="background: green" ="editarSalon(${salon.id})">Editar</button>
                             </div>
                         </div>
                     `;

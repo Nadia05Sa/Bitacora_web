@@ -80,8 +80,8 @@ async function cargarAlumnos() {
                         <p>Matrícula: ${alumno.matricula}</p>
                         <p>Correo: ${alumno.correo}</p>
                         <div class="alumno-actions">
-                            ${adminRole ? `<button class="editar" class="edit-button" onclick="editarAlumno('${alumno.correo}')">Editar</button>` : ''}
-                            ${adminRole ? `<button class="eliminar" onclick="eliminarAlumno('${alumno.correo}')">Eliminar</button>` : ''}
+                            ${adminRole ? `<button style="background: green" class="edit-button" onclick="editarAlumno('${alumno.correo}')">Editar</button>` : ''}
+                            ${adminRole ? `<button style="background: red" onclick="eliminarAlumno('${alumno.correo}')">Eliminar</button>` : ''}
                         </div>
                     </div>
                 `;

@@ -6,7 +6,6 @@ body {
     justify-content: flex-start;
     align-items: center;
     height: 100vh;
-    max-height: 100vh;
     background: no-repeat center/cover url("../img/SalonCecadec2.jpg");
     font-family: 'Montserrat Alternates', sans-serif;
     position: relative;
@@ -18,8 +17,7 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
-    max-height: 100%;
+    height: 100vh;
     background-color: rgba(0, 0, 0, 0.5); /* Negro con 50% de opacidad */
     z-index: 1; /* Se coloca detrás del contenido principal */
 }
@@ -29,6 +27,7 @@ body {
     width: 90%;
     max-width: 600px;
     margin-top: 20px;
+    margin-bottom: 20px;
     padding: 20px;
     background: rgba(255, 255, 255, 0.7);
     border-radius: 10px;
@@ -119,21 +118,19 @@ button:hover {
     margin-top: 10px;
     padding: 5px 10px;
     font-size: 14px;
-    background: #f44336;
     color: white;
     border: none;
     border-radius: 3px;
     cursor: pointer;
+    transition: background 0.3s ease;
 }
-
 .alumno-actions button:hover {
-    background: #d32f2f;
+    border: #1f1f1f; /* Color de hover */
 }
 
-.alumno-actions .edit-button {
-    background: #4caf50;
-}
-
-.alumno-actions .edit-button:hover {
-    background: #388e3c;
+.alumno-actions {
+    display: flex; /* Asegura que los botones estén visibles */
+    gap: 10px; /* Espaciado entre botones */
+    justify-content: flex-start; /* Alinea los botones hacia la izquierda */
+    margin-top: 10px; /* Margen superior */
 }

@@ -191,13 +191,13 @@ async function renderizarTecnicos() {
                     <p><strong>Tipo:</strong> ${tecnico.tipo}</p>
                 </div>
                 <div class="empleado-actions">
-                    <button class="eliminar"
+                    <button style="background: red"
                         onclick="eliminarTecnico('${tecnico.correo}')" 
                         aria-label="Eliminar técnico ${tecnico.nombre} ${tecnico.apellido}"
                     >
                         Eliminar
                     </button>
-                    <button class="editar"
+                    <button style="background: green"
                         onclick="prepararEdicion('${tecnico.correo}', '${tecnico.nombre}', '${tecnico.apellido}', '${tecnico.contrasena}', '${tecnico.tipo}')"
                         aria-label="Editar técnico ${tecnico.nombre} ${tecnico.apellido}"
                     >

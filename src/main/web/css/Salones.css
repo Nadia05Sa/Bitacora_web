@@ -27,6 +27,7 @@ body {
     width: 90%;
     max-width: 600px;
     margin-top: 20px;
+    margin-bottom: 20px;
     padding: 20px;
     background: rgba(255, 255, 255, 0.7);
     border-radius: 10px;
@@ -121,20 +122,17 @@ button:hover {
     border: none;
     border-radius: 3px;
     cursor: pointer;
+    transition: background 0.3s ease;
 }
-.salon-actions button .eliminar {
-    background: #f44336;
-}
-
-.salon-actions button:hover .eliminar {
-    background: #d32f2f;
-}
-.salon-actions button .editar{
-    background: #3656f4;
+.salon-actions button:hover {
+    border: #1f1f1f; /* Color de hover */
 }
 
-.salon-actions button:hover .editar{
-    background: #2f3dd3;
+.salon-actions {
+    display: flex; /* Asegura que los botones estén visibles */
+    gap: 10px; /* Espaciado entre botones */
+    justify-content: flex-start; /* Alinea los botones hacia la izquierda */
+    margin-top: 10px; /* Margen superior */
 }
 
 /* Estilo para el modal */

@@ -27,6 +27,7 @@ body {
     width: 90%;
     max-width: 600px;
     margin-top: 20px;
+    margin-bottom: 20px;
     padding: 20px;
     background: rgba(255, 255, 255, 0.7);
     border-radius: 10px;
@@ -129,3 +130,10 @@ button:hover {
 .equipo-actions button:hover .editar{
     background: #2f3dd3;
 }
+
+/* estilo para la iamgen */
+  .custom-img {
+      width: 100%;
+      height: auto;  /* Mantiene la relación de aspecto */
+      max-width: 300px;  /* Limita el ancho máximo */
+  }

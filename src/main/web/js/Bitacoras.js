@@ -33,7 +33,7 @@ function cargarBitacoras() {
                 // Si hay una imagen en base64, la mostramos
                 let imgHtml = '';
                 if (bitacora.foto) {
-                    imgHtml = `<img src="data:image/jpeg;base64,${bitacora.foto}" alt="Imagen de la bitácora" class="bitacora-img"/>`;
+                    imgHtml = `<img src="data:image/jpeg;base64,${bitacora.foto}" alt="Imagen de la bitácora" class="bitacora-img custom-img"/>`;
                 }
 
                 div.innerHTML = `
@@ -46,17 +46,24 @@ function cargarBitacoras() {
                                 height: 100%;
                             }
                         </style>
-                    <img style="width: 30vh" src="${imgHtml}" alt="Evidencia">
-                    <p><strong>Fecha:</strong> ${bitacora.fecha}</p>
-                    <p><strong>Hora Entrada:</strong> ${bitacora.horaEntrada}</p>
-                    <p><strong>Hora Salida:</strong> ${bitacora.horaSalida}</p>
-                    <p><strong>Maestro:</strong> ${bitacora.maestro}</p>
-                    <p><strong>Grado:</strong> ${bitacora.grado}</p>
-                    <p><strong>Grupo:</strong> ${bitacora.grupo}</p>
-                    <p><strong>Descripción:</strong> ${bitacora.descripcion}</p>
-                    <div class="bitacora-actions">
-                        <button onclick="eliminarBitacora(${bitacora.id})">Eliminar</button>
+                    <div style="display: flex;">
+                        <div>
+                            ${imgHtml}
+                        </div>
+                        <div style="width: 300px; margin-left: 10px">
+                            <p><strong>Fecha:</strong> ${bitacora.fecha}</p>
+                            <p><strong>Hora Entrada:</strong> ${bitacora.horaEntrada}</p>
+                            <p><strong>Hora Salida:</strong> ${bitacora.horaSalida}</p>
+                            <p><strong>Maestro:</strong> ${bitacora.maestro}</p>
+                            <p><strong>Grado:</strong> ${bitacora.grado}</p>
+                            <p><strong>Grupo:</strong> ${bitacora.grupo}</p>
+                            <p><strong>Descripción:</strong> ${bitacora.descripcion}</p>
+                            
+                        </div>
                     </div>
+                    <div class="bitacora-actions">
+                            <button style="background: red" onclick="eliminarBitacora(${bitacora.id})">Eliminar</button>
+                    </div>                   
                 `;
                 bitacoraList.appendChild(div);
             });

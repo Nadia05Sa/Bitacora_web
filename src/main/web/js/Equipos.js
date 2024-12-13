@@ -169,10 +169,10 @@ class EquipoManager {
                         <p><strong>Número de Serie:</strong> ${equipo.numeroSerie}</p>
                     </div>
                     <div class="equipo-actions">
-                        <button class="eliminar" onclick="EquipoManager.eliminarEquipo(${equipo.id})" aria-label="Eliminar equipo">
+                        <button style="background: red" onclick="EquipoManager.eliminarEquipo(${equipo.id})" aria-label="Eliminar equipo">
                             Eliminar
                         </button>
-                        <button class="editar" onclick="EquipoManager.prepararEdicion(${equipo.id})" aria-label="Editar equipo">
+                        <button style="background: green" onclick="EquipoManager.prepararEdicion(${equipo.id})" aria-label="Editar equipo">
                             Editar
                         </button>
                     </div>

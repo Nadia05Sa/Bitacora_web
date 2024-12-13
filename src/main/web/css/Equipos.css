@@ -26,6 +26,7 @@ body {
     width: 90%;
     max-width: 600px;
     margin-top: 20px;
+    margin-bottom: 20px;
     padding: 20px;
     background: rgba(255, 255, 255, 0.7);
     border-radius: 10px;
@@ -120,21 +121,12 @@ button:hover {
     border: none;
     border-radius: 3px;
     cursor: pointer;
+    transition: background 0.3s ease;
 }
-.equipo-actions button .eliminar {
-    background: #f44336;
-}
-
-.equipo-actions button:hover .eliminar {
-    background: #d32f2f;
-}
-.equipo-actions button .editar{
-    background: #3656f4;
+.equipo-actions button:hover {
+    border: #1f1f1f; /* Color de hover */
 }
 
-.equipo-actions button:hover .editar{
-    background: #2f3dd3;
-}
 .equipo-actions {
     display: flex; /* Asegura que los botones estén visibles */
     gap: 10px; /* Espaciado entre botones */
@@ -142,17 +134,3 @@ button:hover {
     margin-top: 10px; /* Margen superior */
 }
 
-.equipo-actions button {
-    padding: 5px 10px;
-    font-size: 14px;
-    background: #4CAF50; /* Cambia el color para visualización */
-    color: white;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.equipo-actions button:hover {
-    background: #45a049; /* Color de hover */
-}
