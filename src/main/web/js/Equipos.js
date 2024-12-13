@@ -12,22 +12,22 @@ function mostrarMensaje(mensaje, tipo) {
 }
 
 // Registrar un nuevo equipo
-document.getElementById('equipoForm').addEventListener('submit', function (e) {
+function registrarEquipo(e) {
     e.preventDefault();
 
     const equipo = {
         marca: document.getElementById('marca').value.trim(),
         modelo: document.getElementById('modelo').value.trim(),
         numeroSerie: document.getElementById('numeroSerie').value.trim(),
+        salonId: parseInt(document.getElementById('salonId').value.trim(), 10) // Convertir el salonId a número
     };
 
-    // Verificar si todos los campos están completos
-    if (!equipo.marca || !equipo.modelo || !equipo.numeroSerie) {
-        mostrarMensaje('Por favor completa todos los campos.', 'error');
+    // Validar campos
+    if (!equipo.marca || !equipo.modelo || !equipo.numeroSerie || isNaN(equipo.salonId)) {
+        mostrarMensaje('Por favor completa todos los campos correctamente.', 'error');
         return;
     }
 
-    // Desactivar el botón para evitar múltiples envíos
     const submitButton = e.target.querySelector('button');
     submitButton.disabled = true;
 
@@ -53,11 +53,13 @@ document.getElementById('equipoForm').addEventListener('submit', function (e) {
                 mostrarMensaje(data.message || 'Error al registrar el equipo', 'error');
             }
         })
-        .catch(error => mostrarMensaje(error.message || 'Error al registrar el equipo', 'error'))
+        .catch(error => {
+            mostrarMensaje(error.message || 'Error al registrar el equipo', 'error')
+        })
         .finally(() => {
             submitButton.disabled = false;
         });
-});
+}
 
 // Cargar lista de equipos
 function cargarEquipos() {
@@ -78,12 +80,13 @@ function cargarEquipos() {
                 data.data.forEach(equipo => {
                     const div = document.createElement('div');
                     div.className = 'equipo-item';
-                    div.setAttribute('data-id', equipo.id);  // Agregar ID al elemento para actualizarlo
+                    div.setAttribute('data-id', equipo.id);
                     div.innerHTML = `
                         <div>
                             <strong>${equipo.marca}</strong>
                             <p>Modelo: ${equipo.modelo}</p>
                             <p>Número de serie: ${equipo.numeroSerie}</p>
+                            <p>Salón ID: ${equipo.salon.id}</p>
                             <div class="equipo-actions">
                                 <button onclick="eliminarEquipo(${equipo.id})">Eliminar</button>
                                 <button onclick="editarEquipo(${equipo.id})">Editar</button>
@@ -114,7 +117,6 @@ function eliminarEquipo(id) {
                 });
             }
             mostrarMensaje('Equipo eliminado con éxito', 'success');
-            // Eliminar el equipo en el DOM sin recargar toda la lista
             cargarEquipos();
         })
         .catch(error => mostrarMensaje(error.message || 'Error al eliminar el equipo', 'error'));
@@ -132,12 +134,14 @@ function editarEquipo(id) {
             return response.json();
         })
         .then(data => {
-            if (data.codigo === 200 && data.data) { // Verifica que la respuesta tenga los datos esperados
+            if (data.codigo === 200 && data.data) {
                 const equipo = data.data;
+
                 // Llenar el formulario con los datos actuales del equipo
                 document.getElementById('marca').value = equipo.marca;
                 document.getElementById('modelo').value = equipo.modelo;
                 document.getElementById('numeroSerie').value = equipo.numeroSerie;
+                document.getElementById('salonId').value = equipo.salon.id; // Convertir el salonId a número
 
                 const form = document.getElementById('equipoForm');
                 form.querySelector('button').textContent = "Actualizar Equipo";
@@ -147,10 +151,19 @@ function editarEquipo(id) {
                     e.preventDefault();
 
                     const updatedEquipo = {
-                        marca: document.getElementById('marca').value,
-                        modelo: document.getElementById('modelo').value,
-                        numeroSerie: document.getElementById('numeroSerie').value,
+                        marca: document.getElementById('marca').value.trim(),
+                        modelo: document.getElementById('modelo').value.trim(),
+                        numeroSerie: document.getElementById('numeroSerie').value.trim(),
+                        salonId: parseInt(document.getElementById('salonId').value.trim(), 10) // Convertir el salonId a número
                     };
+
+                    if (!updatedEquipo.marca || !updatedEquipo.modelo || !updatedEquipo.numeroSerie || isNaN(updatedEquipo.salonId)) {
+                        mostrarMensaje('Por favor completa todos los campos correctamente.', 'error');
+                        return;
+                    }
+
+                    const submitButton = e.target.querySelector('button');
+                    submitButton.disabled = true;
 
                     fetch(`${apiBaseUrl}/${id}`, {
                         method: 'PUT',
@@ -168,15 +181,18 @@ function editarEquipo(id) {
                         .then(data => {
                             if (data.codigo === 200) {
                                 mostrarMensaje('Equipo actualizado con éxito', 'success');
-                                // Actualizar el equipo en el DOM sin recargar toda la lista
-                                actualizarEquipoEnDOM(id, updatedEquipo);
+                                cargarEquipos();
                                 form.reset();
                                 form.querySelector('button').textContent = "Registrar Equipo";
+                                form.onsubmit = registrarEquipo; // Volver a la función original
                             } else {
                                 mostrarMensaje(data.message || 'Error al actualizar el equipo', 'error');
                             }
                         })
-                        .catch(error => mostrarMensaje(error.message || 'Error al actualizar el equipo', 'error'));
+                        .catch(error => mostrarMensaje(error.message || 'Error al actualizar el equipo', 'error'))
+                        .finally(() => {
+                            submitButton.disabled = false;
+                        });
                 };
             } else {
                 throw new Error(data.message || 'Datos del equipo no encontrados');
@@ -185,17 +201,8 @@ function editarEquipo(id) {
         .catch(error => mostrarMensaje(error.message || 'Error al obtener los datos del equipo', 'error'));
 }
 
-// Actualizar el equipo en el DOM
-function actualizarEquipoEnDOM(id, updatedEquipo) {
-    const equiposList = document.getElementById('equiposList');
-    const equipoItem = equiposList.querySelector(`.equipo-item[data-id="${id}"]`);
-
-    if (equipoItem) {
-        equipoItem.querySelector('strong').textContent = updatedEquipo.marca;
-        equipoItem.querySelector('p:nth-child(2)').textContent = `Modelo: ${updatedEquipo.modelo}`;
-        equipoItem.querySelector('p:nth-child(3)').textContent = `Número de serie: ${updatedEquipo.numeroSerie}`;
-    }
-}
-
 // Cargar equipos al inicio
 document.addEventListener('DOMContentLoaded', cargarEquipos);
+
+// Asignar la función de registrar al inicio
+document.getElementById('equipoForm').onsubmit = registrarEquipo;
