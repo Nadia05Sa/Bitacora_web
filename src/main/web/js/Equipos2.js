@@ -12,14 +12,15 @@ function mostrarMensaje(mensaje, tipo) {
 }
 
 // Registrar un nuevo equipo
-function registrarEquipo(e) {
+document.getElementById('equipoForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
+    const salonIdValue = document.getElementById('salonId').value.trim();
     const equipo = {
         marca: document.getElementById('marca').value.trim(),
         modelo: document.getElementById('modelo').value.trim(),
         numeroSerie: document.getElementById('numeroSerie').value.trim(),
-        salonId: parseInt(document.getElementById('salonId').value.trim(), 10) // Convertir el salonId a número
+        salonId: parseInt(salonIdValue, 10) // Convertir el salonId a número
     };
 
     // Validar campos
@@ -48,18 +49,18 @@ function registrarEquipo(e) {
             if (data.codigo === 201) {
                 mostrarMensaje('Equipo registrado con éxito', 'success');
                 document.getElementById('equipoForm').reset();
-                cargarEquipos(); // Recargar lista de equipos después de registrar
+                cargarEquipos();
             } else {
                 mostrarMensaje(data.message || 'Error al registrar el equipo', 'error');
             }
         })
         .catch(error => {
-            mostrarMensaje(error.message || 'Error al registrar el equipo', 'error')
+            mostrarMensaje(error.message || 'Error al registrar el equipo', 'error');
         })
         .finally(() => {
             submitButton.disabled = false;
         });
-}
+});
 
 // Cargar lista de equipos
 function cargarEquipos() {
@@ -86,7 +87,6 @@ function cargarEquipos() {
                             <strong>${equipo.marca}</strong>
                             <p>Modelo: ${equipo.modelo}</p>
                             <p>Número de serie: ${equipo.numeroSerie}</p>
-                            <p>Salón ID: ${equipo.salon.id}</p>
                             <div class="equipo-actions">
                                 <button onclick="eliminarEquipo(${equipo.id})">Eliminar</button>
                                 <button onclick="editarEquipo(${equipo.id})">Editar</button>
@@ -117,7 +117,7 @@ function eliminarEquipo(id) {
                 });
             }
             mostrarMensaje('Equipo eliminado con éxito', 'success');
-            cargarEquipos();
+            cargarEquipos(); // Recargar lista de equipos después de eliminar
         })
         .catch(error => mostrarMensaje(error.message || 'Error al eliminar el equipo', 'error'));
 }
@@ -181,7 +181,7 @@ function editarEquipo(id) {
                         .then(data => {
                             if (data.codigo === 200) {
                                 mostrarMensaje('Equipo actualizado con éxito', 'success');
-                                cargarEquipos();
+                                cargarEquipos(); // Recargar lista de equipos después de editar
                                 form.reset();
                                 form.querySelector('button').textContent = "Registrar Equipo";
                                 form.onsubmit = registrarEquipo; // Volver a la función original
