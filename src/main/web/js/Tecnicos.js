@@ -175,6 +175,15 @@ async function renderizarTecnicos() {
         }
 
         empleadosList.innerHTML = tecnicos.map(tecnico => `
+                        <style>
+                             body {
+                                height: 100%;
+                            }
+                            
+                            .overlay {
+                                height: 100%;
+                            }
+                        </style>
             <div class="empleado-item" data-correo="${tecnico.correo}">
                 <div class="empleado-info">
                     <h3>${tecnico.nombre} ${tecnico.apellido}</h3>
@@ -182,13 +191,13 @@ async function renderizarTecnicos() {
                     <p><strong>Tipo:</strong> ${tecnico.tipo}</p>
                 </div>
                 <div class="empleado-actions">
-                    <button 
+                    <button style="background: red"
                         onclick="eliminarTecnico('${tecnico.correo}')" 
                         aria-label="Eliminar técnico ${tecnico.nombre} ${tecnico.apellido}"
                     >
                         Eliminar
                     </button>
-                    <button 
+                    <button style="background: green"
                         onclick="prepararEdicion('${tecnico.correo}', '${tecnico.nombre}', '${tecnico.apellido}', '${tecnico.contrasena}', '${tecnico.tipo}')"
                         aria-label="Editar técnico ${tecnico.nombre} ${tecnico.apellido}"
                     >

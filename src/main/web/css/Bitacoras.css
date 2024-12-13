@@ -27,6 +27,7 @@ body {
     width: 90%;
     max-width: 600px;
     margin-top: 20px;
+    margin-bottom: 20px;
     padding: 20px;
     background: rgba(255, 255, 255, 0.7);
     border-radius: 10px;
@@ -109,13 +110,30 @@ button:hover {
     margin-top: 10px;
     padding: 5px 10px;
     font-size: 14px;
-    background: #f44336;
     color: white;
     border: none;
     border-radius: 3px;
     cursor: pointer;
 }
 
-.equipo-actions button:hover {
+.equipo-actions button .eliminar {
+    background: #f44336;
+}
+
+.equipo-actions button:hover .eliminar {
     background: #d32f2f;
 }
+.equipo-actions button .editar{
+    background: #3656f4;
+}
+
+.equipo-actions button:hover .editar{
+    background: #2f3dd3;
+}
+
+/* estilo para la iamgen */
+  .custom-img {
+      width: 100%;
+      height: auto;  /* Mantiene la relación de aspecto */
+      max-width: 300px;  /* Limita el ancho máximo */
+  }

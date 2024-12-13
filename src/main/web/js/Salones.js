@@ -94,13 +94,22 @@ function cargarSalones() {
                     div.className = 'salon-item';
                     div.setAttribute('data-id', salon.id);
                     div.innerHTML = `
+                        <style>
+                             body {
+                                height: 100%;
+                            }
+                            
+                            .overlay {
+                                height: 100%;
+                            }
+                        </style>
                         <div>
                             <strong>${salon.nombre}</strong>
                             <p>Ubicación: ${salon.ubicacion}</p>
                             <p>Capacidad: ${salon.capacidad}</p>
                             <div class="salon-actions">
-                                <button onclick="eliminarSalon(${salon.id})">Eliminar</button>
-                                <button onclick="editarSalon(${salon.id})">Editar</button>
+                                <button style="background: red" onclick="eliminarSalon(${salon.id})">Eliminar</button>
+                                <button style="background: green" ="editarSalon(${salon.id})">Editar</button>
                             </div>
                         </div>
                     `;

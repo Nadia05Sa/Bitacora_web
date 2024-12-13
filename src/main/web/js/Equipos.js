@@ -153,6 +153,15 @@ class EquipoManager {
             }
 
             equiposList.innerHTML = equipos.map(equipo => `
+                         <style>
+                             body {
+                                height: 100%;
+                            }
+                            
+                            .overlay {
+                                height: 100%;
+                            }
+                        </style>
                 <div class="equipo-item" data-id="${equipo.id}">
                     <div class="equipo-info">
                         <h3>${equipo.marca}</h3>
@@ -160,10 +169,10 @@ class EquipoManager {
                         <p><strong>Número de Serie:</strong> ${equipo.numeroSerie}</p>
                     </div>
                     <div class="equipo-actions">
-                        <button onclick="EquipoManager.eliminarEquipo(${equipo.id})" aria-label="Eliminar equipo">
+                        <button style="background: red" onclick="EquipoManager.eliminarEquipo(${equipo.id})" aria-label="Eliminar equipo">
                             Eliminar
                         </button>
-                        <button onclick="EquipoManager.prepararEdicion(${equipo.id})" aria-label="Editar equipo">
+                        <button style="background: green" onclick="EquipoManager.prepararEdicion(${equipo.id})" aria-label="Editar equipo">
                             Editar
                         </button>
                     </div>

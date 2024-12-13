@@ -66,13 +66,22 @@ async function cargarAlumnos() {
                 const div = document.createElement('div');
                 div.className = 'alumno-item';
                 div.innerHTML = `
+                        <style>
+                             body {
+                                height: 100%;
+                            }
+                            
+                            .overlay {
+                                height: 100%;
+                            }
+                        </style>
                     <div>
                         <strong>${alumno.nombre} ${alumno.apellido}</strong>
                         <p>Matrícula: ${alumno.matricula}</p>
                         <p>Correo: ${alumno.correo}</p>
                         <div class="alumno-actions">
-                            ${adminRole ? `<button class="edit-button" onclick="editarAlumno('${alumno.correo}')">Editar</button>` : ''}
-                            ${adminRole ? `<button onclick="eliminarAlumno('${alumno.correo}')">Eliminar</button>` : ''}
+                            ${adminRole ? `<button style="background: green" class="edit-button" onclick="editarAlumno('${alumno.correo}')">Editar</button>` : ''}
+                            ${adminRole ? `<button style="background: red" onclick="eliminarAlumno('${alumno.correo}')">Eliminar</button>` : ''}
                         </div>
                     </div>
                 `;

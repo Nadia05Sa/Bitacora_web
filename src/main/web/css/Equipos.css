@@ -26,6 +26,7 @@ body {
     width: 90%;
     max-width: 600px;
     margin-top: 20px;
+    margin-bottom: 20px;
     padding: 20px;
     background: rgba(255, 255, 255, 0.7);
     border-radius: 10px;
@@ -116,15 +117,14 @@ button:hover {
     margin-top: 10px;
     padding: 5px 10px;
     font-size: 14px;
-    background: #f44336;
     color: white;
     border: none;
     border-radius: 3px;
     cursor: pointer;
+    transition: background 0.3s ease;
 }
-
 .equipo-actions button:hover {
-    background: #d32f2f;
+    border: #1f1f1f; /* Color de hover */
 }
 
 .equipo-actions {
@@ -134,17 +134,3 @@ button:hover {
     margin-top: 10px; /* Margen superior */
 }
 
-.equipo-actions button {
-    padding: 5px 10px;
-    font-size: 14px;
-    background: #4CAF50; /* Cambia el color para visualización */
-    color: white;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.equipo-actions button:hover {
-    background: #45a049; /* Color de hover */
-}
