@@ -3,12 +3,14 @@ const apiBaseUrl = 'http://localhost:8080/v1/bitacoras';
 // Mostrar mensajes
 function showMessage(message, type) {
     const messageBox = document.getElementById('message');
-    messageBox.className = type;
-    messageBox.textContent = message;
-    setTimeout(() => {
-        messageBox.className = '';
-        messageBox.textContent = '';
-    }, 3000);
+    if (messageBox) {
+        messageBox.className = type;
+        messageBox.textContent = message;
+        setTimeout(() => {
+            messageBox.className = '';
+            messageBox.textContent = '';
+        }, 3000);
+    }
 }
 
 // Cargar lista de bitácoras
@@ -21,19 +23,28 @@ function cargarBitacoras() {
             return response.json();
         })
         .then((data) => {
-            const bitacoras = data.data;  // Asegúrate de que `data` esté correctamente definido en la respuesta
-            console.log(bitacoras);  // Agrega esto para ver los datos que se están obteniendo
+            console.log(data); // Verificar la respuesta del servidor
+            const bitacoras = data.data;
+            if (!bitacoras || bitacoras.length === 0) {
+                showMessage('No hay bitácoras disponibles', 'info');
+                return;
+            }
+
             const bitacoraList = document.getElementById('bitacoraList');
+            if (!bitacoraList) return;
+
             bitacoraList.innerHTML = '';
 
             bitacoras.forEach((bitacora) => {
                 const div = document.createElement('div');
                 div.className = 'bitacora-item';
 
-                // Si hay una imagen en base64, la mostramos
+                // Verificar si la foto es una cadena base64
                 let imgHtml = '';
                 if (bitacora.foto) {
-                    imgHtml = `<img src="data:image/jpeg;base64,${bitacora.foto}" alt="Imagen de la bitácora" class="bitacora-img"/>`;
+                    // Si la foto tiene un valor que empieza con "/9j", añadimos el prefijo
+                    const imgSrc = bitacora.foto.startsWith('/9j') ? `data:image/jpeg;base64,${bitacora.foto}` : bitacora.foto;
+                    imgHtml = `<img src="${imgSrc}" alt="Imagen de la bitácora" class="bitacora-img"/>`;
                 }
 
                 div.innerHTML = `
