@@ -1,7 +1,7 @@
 describe('Prueba de Login', () => {
   it('Debe realizar el login correctamente y redirigir a la página de inicio', () => {
     // Visita la página de inicio de sesión
-    cy.visit('http://192.168.111.112:9090/src/main/web/Login.html');
+    cy.visit('http://192.168.109.34:9090/src/main/web/Login.html');
 
     // Completar los campos de correo y contraseña
     cy.get('#email').type('admin'); // Campo de correo

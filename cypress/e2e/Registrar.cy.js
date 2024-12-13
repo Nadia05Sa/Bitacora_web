@@ -1,7 +1,7 @@
 describe('Prueba de Registro de Empleados', () => {
   it('Debe registrar un empleado correctamente y mostrarlo en la lista', () => {
     // Visitar la página inicial
-    cy.visit('http://127.0.0.1:9090/src/main/web/Login.html');
+    cy.visit('http://192.168.109.34:9090/src/main/web/Login.html');
 
     // Completar el inicio de sesión
     cy.get('#email').type('admin');
