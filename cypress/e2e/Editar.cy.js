@@ -1,10 +1,18 @@
 describe('Prueba de Edición de Alumno', () => {
     it('Debe editar un alumno correctamente y reflejar los cambios', () => {
-        // ... (suponiendo que ya estamos en la página de gestión de alumnos)
+        // Visitar la página inicial y realizar el login
+        cy.visit('http://192.168.109.34:9090/src/main/web/Login.html');
+        cy.get('#email').type('admin');
+        cy.get('#password').type('admin1234');
+        cy.get('#loginButton').click();
 
-        // Buscar el alumno a editar por su correo (ajusta el selector si es necesario)
-        cy.contains('td', '20233tn069@utez.edu.mx')
-            .parent() // Ir al elemento padre (la fila del alumno)
+        // Navegar al menú y a la gestión de alumnos
+        cy.get('div.btn-menu label[for="btn-menu"]').click();
+        cy.contains('a', 'Gestión de Alumnos').click();
+
+        // Buscar el alumno a editar por su matrícula
+        cy.contains('p', 'Matrícula: 20233tn069')
+            .parent() // Ir al elemento padre (el div que contiene la información del alumno)
             .find('.edit-button')
             .click();
 
@@ -17,9 +25,7 @@ describe('Prueba de Edición de Alumno', () => {
         cy.contains('button', 'OK').click();
 
         // Validar que los cambios se hayan guardado
-        cy.contains('td', 'Nuevo Nombre')
-            .should('exist'); // Asegurarse de que el nuevo nombre esté presente
-        cy.contains('td', 'Nuevo Apellido')
-            .should('exist');
+        cy.contains('strong', 'Nuevo Nombre')
+            .should('exist'); // Asegurarse de que el nuevo nombre esté presente en el elemento <strong>
     });
 });

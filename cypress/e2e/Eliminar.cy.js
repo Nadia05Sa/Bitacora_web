@@ -1,21 +1,32 @@
 describe('Prueba de Eliminación de Alumno', () => {
     it('Debe eliminar un alumno correctamente y no aparecer en la lista', () => {
-        // ... (suponiendo que ya estamos en la página de gestión de alumnos)
+        // Visitar la página inicial y realizar el login
+        cy.visit('http://192.168.109.34:9090/src/main/web/Login.html');
+        cy.get('#email').type('admin');
+        cy.get('#password').type('admin1234');
+        cy.get('#loginButton').click();
 
-        // Buscar el alumno a eliminar por su correo (ajusta el selector si es necesario)
-        cy.contains('td', '20233tn069@utez.edu.mx')
-            .parent() // Ir al elemento padre (la fila del alumno)
-            .find('.delete-button') // Asumimos que el botón tiene la clase 'delete-button'
+        // Navegar al menú y a la gestión de alumnos
+        cy.get('div.btn-menu label[for="btn-menu"]').click();
+        cy.contains('a', 'Gestión de Alumnos').click();
+
+        // ... (resto de la prueba, como la tienes actualmente)
+
+        // Buscar al alumno a eliminar por su matrícula
+        cy.contains('p', 'Matrícula: 20233tn069')
+            .parent() // Ir al elemento padre (el div que contiene la información del alumno)
+            .find('.delete-button')
             .click();
 
-        // Si aparece un modal de confirmación, confirma la eliminación
-        cy.contains('button', 'Confirmar').click(); // Ajusta el texto del botón si es diferente
+        // Confirmar la eliminación
+        cy.on('window:confirm', () => true); // Confirmar la alerta
+        cy.contains('button', 'Eliminar').click(); // Hacer clic en el botón de eliminar
 
-        // Esperar a que la lista se actualice (opcional)
-        cy.wait(1000);
+        // Esperar a que la lista se actualice
+        cy.wait(2000);
 
         // Validar que el alumno ya no esté en la lista
-        cy.contains('td', '20233tn069@utez.edu.mx')
+        cy.contains('p', 'Matrícula: 20233tn069')
             .should('not.exist');
     });
 });
