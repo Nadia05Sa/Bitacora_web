@@ -15,11 +15,6 @@ function showMessage(message, type) {
 document.getElementById('salonForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
-    if (!adminRole) {
-        showMessage('No tienes permisos para registrar Salones', 'error');
-        return;
-    }
-
     const salon = {
         nombre: document.getElementById('nombre').value.trim(),
         ubicacion: document.getElementById('ubicacion').value.trim(),
